@@ -3,31 +3,49 @@ import requests
 import time
 import re
 
-# Title for the Streamlit web app
 st.set_page_config(
     page_title="Weather Daily",
-    page_icon="./assets/logo.png"  # You can also use an emoji or provide a URL or local path to an icon file
+    page_icon="./assets/logo.png"
 )
 
 st.title("Weather Daily")
 
-# Function to parse user input for location and day
+# Function to parse user input for location and type of request
+
+
 def parse_query(user_query):
     location = None
-    day = 0  # Default to current day
+    category = "current"  # Default to current weather
+    days_requested = 1    # Default to 1 day for single-day forecasts
+
     user_query = user_query.lower()
 
     # Adding a prefix if not present
     if "weather in" not in user_query:
         user_query = "weather in " + user_query
 
-    # Determine day requested
+    # Determine category of forecast
     if "tomorrow" in user_query:
-        day = 1
+        category = "specific"
+        days_requested = 1
     elif "after" in user_query:
         days_match = re.search(r"after (\d+) days?", user_query)
         if days_match:
-            day = int(days_match.group(1))
+            category = "specific"
+            days_requested = int(days_match.group(1))
+    elif "for" in user_query:
+        days_match = re.search(r"for (\d+) days?", user_query)
+        if days_match:
+            category = "multiple"
+            days_requested = int(days_match.group(1))
+    elif "in" in user_query:
+        days_match = re.search(r"in (\d+) days?", user_query)
+        if days_match:
+            category = "multiple"
+            days_requested = int(days_match.group(1))
+    elif "this week" in user_query:
+        category = "multiple"
+        days_requested = 7
 
     # Extract the location
     location_match = re.search(r"weather in (.+)", user_query)
@@ -36,26 +54,28 @@ def parse_query(user_query):
     else:
         location = "unknown location"
 
-    return location, day
+    return location, category, days_requested
 
-# Function to get weather data
+# Function to get weather data based on category
 
 
-def get_weather_data(location, day):
+def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
     api_key = "ff77f4dadf90414895e164755240511"  # Replace with your API key
-    if day == 0:  # Current weather
+
+    if category == "current":  # Current weather
         api_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=no"
-    else:  # Future weather forecast
-        api_url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={day+1}&aqi=no&alerts=no"
+    else:  # Future weather forecast (specific or multiple days)
+        days_to_fetch = min(days_requested, 10)  # Cap at 10 days
+        api_url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
 
     try:
         response = requests.get(api_url)
-        response.raise_for_status()  # Raise an exception for HTTP errors
+        response.raise_for_status()
         data = response.json()
 
-        if day == 0:
+        if category == "current":
             # Extract current weather data
             location_name = data['location']['name']
             region = data['location']['region']
@@ -76,22 +96,45 @@ def get_weather_data(location, day):
                     f"- Wind Speed: {wind_speed_kph} kph\n"
                     f"- Precipitation: {precipitation} mm")
 
-        else:
-            # Extract future weather forecast data
-            forecast = data['forecast']['forecastday'][-1]
-            forecast_date = forecast['date']
-            max_temp = forecast['day']['maxtemp_c']
-            min_temp = forecast['day']['mintemp_c']
-            condition = forecast['day']['condition']['text']
-            chance_of_rain = forecast['day']['daily_chance_of_rain']
+        elif category == "specific":
+            # Extract forecast for a specific future day
+            forecast_day = data['forecast']['forecastday'][-1]
+            region = data['location']['region']
+            country = data['location']['country']
+            date = forecast_day['date']
+            condition = forecast_day['day']['condition']['text']
+            max_temp = forecast_day['day']['maxtemp_c']
+            min_temp = forecast_day['day']['mintemp_c']
+            chance_of_rain = forecast_day['day'].get('daily_chance_of_rain', 0)
 
-            return (f"Weather forecast for {location.title()}, on {forecast_date}:\n"
+            return (f"Weather forecast for {location.title()}, {region}, {country} on {date}:\n"
                     f"- Condition: {condition}\n"
                     f"- Max Temperature: {max_temp}°C\n"
                     f"- Min Temperature: {min_temp}°C\n"
                     f"- Chance of Rain: {chance_of_rain}%")
 
-    except requests.exceptions.RequestException as e:
+        elif category == "multiple":
+            # Extract multi-day forecast data
+            forecast_days = data['forecast']['forecastday']
+            region = data['location']['region']
+            country = data['location']['country']
+            forecast_summary = f"Weather forecast for {location.title()}, {region}, {country}: \n\n"
+
+            for day in forecast_days:
+                date = day['date']
+                condition = day['day']['condition']['text']
+                max_temp = day['day']['maxtemp_c']
+                min_temp = day['day']['mintemp_c']
+                chance_of_rain = day['day'].get('daily_chance_of_rain', 0)
+                forecast_summary += (f"Date: {date}\n"
+                                     f"- Condition: {condition}\n"
+                                     f"- Max Temperature: {max_temp}°C\n"
+                                     f"- Min Temperature: {min_temp}°C\n"
+                                     f"- Chance of Rain: {chance_of_rain}%\n\n")
+
+            return forecast_summary.strip()
+
+    except requests.exceptions.RequestException:
         return "I'm unable to fetch live weather data right now. Please check a weather app for the latest information."
 
 
@@ -111,7 +154,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     # Parse user query for location and day
-    location, day = parse_query(prompt)
+    location, category, days_requested = parse_query(prompt)
 
     # Fetch and display assistant's response
     with st.chat_message("assistant"):
@@ -122,7 +165,8 @@ if prompt := st.chat_input("Ask me about the weather!"):
         if location == "unknown location":
             assistant_response = "Please specify a location."
         else:
-            assistant_response = get_weather_data(location, day)
+            assistant_response = get_weather_data(
+                location, category, days_requested)
 
         # Simulate typing effect
         for chunk in assistant_response.split():
