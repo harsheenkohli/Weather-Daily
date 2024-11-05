@@ -127,6 +127,6 @@ if prompt := st.chat_input("Ask me about the weather!"):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
 
-        message_placeholder.markdown(full_response)
+        message_placeholder.markdown(full_response, unsafe_allow_html=True)
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response})
