@@ -9,16 +9,7 @@ st.set_page_config(
     page_icon="./assets/logo.png"  # You can also use an emoji or provide a URL or local path to an icon file
 )
 
-# st.title("Weather Daily")
-st.markdown(
-    """
-    <div style="display: flex; align-items: center;">
-        <img src="./assets/logo.png" width="40" style="margin-right: 10px;">
-        <h1 style="display: inline;">Weather Daily</h1>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.title("Weather Daily")
 
 # Function to parse user input for location and day
 def parse_query(user_query):
