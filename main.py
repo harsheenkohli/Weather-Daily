@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import time
 import re
+import random
+from small_talk import *
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -9,6 +11,9 @@ st.set_page_config(
 )
 
 st.title("Weather Daily")
+
+# Welcome message
+welcome_message = "Hello! Welcome to Weather Daily. Ask me about the weather anywhere in the world!"
 
 # Function to parse user input for location and type of request
 
@@ -140,7 +145,8 @@ def get_weather_data(location, category, days_requested):
 
 # Initialize chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {"role": "assistant", "content": welcome_message}]  # Add welcome message
 
 # Display chat history
 for message in st.session_state.messages:
@@ -153,13 +159,19 @@ if prompt := st.chat_input("Ask me about the weather!"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Parse user query for location and day
-    location, category, days_requested = parse_query(prompt)
-
-    # Fetch and display assistant's response
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
+    # Check if user input is a greeting or a general query
+    lower_prompt = prompt.lower()
+    if any(greet in lower_prompt for greet in greetings):
+        assistant_response = random.choice(greeting_responses)
+    elif any(query in lower_prompt for query in general_queries):
+        assistant_response = random.choice(general_query_responses)
+    elif any(thank in lower_prompt for thank in thanks_phrases):
+        assistant_response = random.choice(thanks_responses)
+    elif any(farewell in lower_prompt for farewell in farewells):
+        assistant_response = random.choice(farewell_responses)
+    else:
+        # Parse user query for location and day
+        location, category, days_requested = parse_query(prompt)
 
         # Get response based on parsed data
         if location == "unknown location":
@@ -167,6 +179,11 @@ if prompt := st.chat_input("Ask me about the weather!"):
         else:
             assistant_response = get_weather_data(
                 location, category, days_requested)
+
+    # Display assistant's response with typing effect
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
 
         # Simulate typing effect
         for chunk in assistant_response.split():
