@@ -67,10 +67,10 @@ def get_weather_data(location, day):
 
             return (f"The current weather in {location_name.title()}, {region}, {country} (as of {local_time}):\n"
                     f"- Condition: {condition}\n"
-                    f"- Temperature: {temp_celsius}°C\n"
-                    f"- Feels like: {feels_like}°C\n"
-                    f"- Humidity: {humidity}%\n"
-                    f"- Wind Speed: {wind_speed_kph} kph\n"
+                    f"- Temperature: {temp_celsius}°C<br>"
+                    f"- Feels like: {feels_like}°C<br>"
+                    f"- Humidity: {humidity}%<br>"
+                    f"- Wind Speed: {wind_speed_kph} kph<br>"
                     f"- Precipitation: {precipitation} mm")
 
         else:
@@ -83,9 +83,9 @@ def get_weather_data(location, day):
             chance_of_rain = forecast['day']['daily_chance_of_rain']
 
             return (f"Weather forecast for {location.title()}, on {forecast_date}:\n"
-                    f"- Condition: {condition}\n"
-                    f"- Max Temperature: {max_temp}°C\n"
-                    f"- Min Temperature: {min_temp}°C\n"
+                    f"- Condition: {condition}<br>"
+                    f"- Max Temperature: {max_temp}°C<br>"
+                    f"- Min Temperature: {min_temp}°C<br>"
                     f"- Chance of Rain: {chance_of_rain}%")
 
     except requests.exceptions.RequestException as e:
