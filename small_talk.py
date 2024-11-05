@@ -5,7 +5,7 @@ greetings = [
     "howdy", "salutations", "yo", "ahoy", "hi there"
 ]
 farewells = [
-    "bye", "goodbye", "see you", "take care", "farewell",
+    "bye", "goodbye", "see you", "take care", "farewell", "no thanks", "nothing",
     "later", "catch you later", "have a nice day", "adios", "until next time"
 ]
 thanks_phrases = [
