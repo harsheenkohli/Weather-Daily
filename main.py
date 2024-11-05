@@ -66,11 +66,11 @@ def get_weather_data(location, day):
             local_time = data['location']['localtime']
 
             return (f"The current weather in {location_name.title()}, {region}, {country} (as of {local_time}):\n"
-                    f"- Condition: {condition}\n"
-                    f"- Temperature: {temp_celsius}°C<br>"
-                    f"- Feels like: {feels_like}°C<br>"
-                    f"- Humidity: {humidity}%<br>"
-                    f"- Wind Speed: {wind_speed_kph} kph<br>"
+                    f"- Condition: {condition}   "
+                    f"- Temperature: {temp_celsius}°C   "
+                    f"- Feels like: {feels_like}°C   "
+                    f"- Humidity: {humidity}%   "
+                    f"- Wind Speed: {wind_speed_kph} kph   "
                     f"- Precipitation: {precipitation} mm")
 
         else:
@@ -83,9 +83,9 @@ def get_weather_data(location, day):
             chance_of_rain = forecast['day']['daily_chance_of_rain']
 
             return (f"Weather forecast for {location.title()}, on {forecast_date}:\n"
-                    f"- Condition: {condition}<br>"
-                    f"- Max Temperature: {max_temp}°C<br>"
-                    f"- Min Temperature: {min_temp}°C<br>"
+                    f"- Condition: {condition}   "
+                    f"- Max Temperature: {max_temp}°C   "
+                    f"- Min Temperature: {min_temp}°C   "
                     f"- Chance of Rain: {chance_of_rain}%")
 
     except requests.exceptions.RequestException as e:
@@ -127,6 +127,6 @@ if prompt := st.chat_input("Ask me about the weather!"):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
 
-        message_placeholder.markdown(full_response, unsafe_allow_html=True)
+        message_placeholder.markdown(full_response)
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response})
