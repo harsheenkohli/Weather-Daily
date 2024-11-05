@@ -4,11 +4,23 @@ import time
 import re
 
 # Title for the Streamlit web app
-st.title("Weather Daily")
+st.set_page_config(
+    page_title="Weather Daily",
+    page_icon="./assets/logo.png"  # You can also use an emoji or provide a URL or local path to an icon file
+)
+
+# st.title("Weather Daily")
+st.markdown(
+    """
+    <div style="display: flex; align-items: center;">
+        <img src="./assets/logo.png" width="40" style="margin-right: 10px;">
+        <h1 style="display: inline;">Weather Daily</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Function to parse user input for location and day
-
-
 def parse_query(user_query):
     location = None
     day = 0  # Default to current day
