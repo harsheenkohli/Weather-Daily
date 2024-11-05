@@ -39,6 +39,8 @@ def parse_query(user_query):
 
 
 def get_weather_data(location, day):
+    if location.lower() == "delhi":
+        location = "New Delhi"
     api_key = "ff77f4dadf90414895e164755240511"  # Replace with your API key
     if day == 0:  # Current weather
         api_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=no"
