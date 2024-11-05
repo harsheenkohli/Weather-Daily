@@ -4,19 +4,23 @@ greetings = [
     "hi", "hello", "hey", "greetings", "what's up",
     "howdy", "salutations", "yo", "ahoy", "hi there"
 ]
+
 farewells = [
     "bye", "goodbye", "see you", "take care", "farewell", "no thanks", "nothing",
     "later", "catch you later", "have a nice day", "adios", "until next time"
 ]
+
 thanks_phrases = [
     "thanks", "thank you", "thanks a lot", "many thanks", "appreciate it",
     "thank you very much", "thanks for your help", "grateful", "cheers"
 ]
+
 general_queries = [
     "how are you", "how are you doing", "what's going on", "how's it going",
     "how's everything", "what's new", "how have you been", "how's life",
     "what's happening", "how's your day"
 ]
+
 greeting_responses = [
     "Hello! How can I assist you with the weather today?",
     "Hi there! What weather information do you need?",
@@ -67,4 +71,17 @@ farewell_responses = [
     "Take care! Come back anytime for weather updates.",
     "Until next time! Keep an eye on the skies!",
     "Adios! Wishing you all the best."
+]
+
+welcome_messages = [
+    "Welcome to Weather Daily! I'm here to provide you with the latest weather updates.",
+    "Hello and welcome! Ask me anything about the weather.",
+    "Greetings! Ready to assist you with all your weather queries.",
+    "Hi there! Let's explore the weather together.",
+    "Welcome! I'm your weather assistant. What do you want to know today?",
+    "Hello! Excited to help you with your weather-related questions.",
+    "Welcome aboard! Feel free to ask me about the weather anytime!",
+    "Hi! I'm here to make your weather inquiries easy and enjoyable.",
+    "Greetings! Let's find out the weather together!",
+    "Welcome! Your go-to source for weather information."
 ]

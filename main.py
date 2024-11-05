@@ -13,7 +13,7 @@ st.set_page_config(
 st.title("Weather Daily")
 
 # Welcome message
-welcome_message = "Hello! Welcome to Weather Daily. Ask me about the weather anywhere in the world!"
+welcome_message = random.choice(welcome_messages)
 
 # Function to parse user input for location and type of request
 
