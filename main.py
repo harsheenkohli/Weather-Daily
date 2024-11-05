@@ -56,15 +56,17 @@ def get_weather_data(location, day):
             region = data['location']['region']
             country = data['location']['country']
             temp_celsius = data['current']['temp_c']
+            feels_like = data['current']['feelslike_c']
             condition = data['current']['condition']['text']
             humidity = data['current']['humidity']
             wind_speed_kph = data['current']['wind_kph']
             precipitation = data['current']['precip_mm']
             local_time = data['location']['localtime']
 
-            return (f"The current weather in {location_name}, {region}, {country} (as of {local_time}):\n"
+            return (f"The current weather in {location_name.title()}, {region}, {country} (as of {local_time}):\n"
                     f"- Condition: {condition}\n"
                     f"- Temperature: {temp_celsius}°C\n"
+                    f"- Feels like: {feels_like}°C\n"
                     f"- Humidity: {humidity}%\n"
                     f"- Wind Speed: {wind_speed_kph} kph\n"
                     f"- Precipitation: {precipitation} mm")
@@ -78,7 +80,7 @@ def get_weather_data(location, day):
             condition = forecast['day']['condition']['text']
             chance_of_rain = forecast['day']['daily_chance_of_rain']
 
-            return (f"Weather forecast for {location}, on {forecast_date}:\n"
+            return (f"Weather forecast for {location.title()}, on {forecast_date}:\n"
                     f"- Condition: {condition}\n"
                     f"- Max Temperature: {max_temp}°C\n"
                     f"- Min Temperature: {min_temp}°C\n"
