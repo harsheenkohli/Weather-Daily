@@ -2,8 +2,6 @@
 import streamlit as st  # Import the Streamlit library
 import random  # Import the random library
 import time  # Import the time library
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import requests
 
