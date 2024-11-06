@@ -83,5 +83,5 @@ welcome_messages = [
     "Welcome aboard! Feel free to ask me about the weather anytime!",
     "Hi! I'm here to make your weather inquiries easy and enjoyable.",
     "Greetings! Let's find out the weather together!",
-    "Welcome! Your go-to source for weather information."
+    "Welcome! Your go-to source for weather information.",
 ]
