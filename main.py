@@ -4,6 +4,7 @@ import time
 import re
 import random
 from small_talk import *
+from PIL import Image
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -11,6 +12,7 @@ st.set_page_config(
 )
 
 st.title("Weather Daily")
+st.caption("Find the current weather, forecast the future or find the AQI in your region seamlessly.")
 
 # Welcome message
 welcome_message = random.choice(welcome_messages)
@@ -39,7 +41,7 @@ def parse_query(user_query):
             location = location_match.group(1).strip()
         else:
             location = "unknown location"
-    
+
     if "tomorrow" in user_query:
         category = "specific"
         days_requested = 1
@@ -131,7 +133,7 @@ def get_weather_data(location, category, days_requested):
 
         elif category == "multiple":
             # Extract multi-day forecast data
-            
+
             forecast_days = data['forecast']['forecastday']
             forecast_summary = f"Weather forecast for {location_name.title()}, {region}, {country}: \n\n"
 
@@ -170,18 +172,22 @@ def get_weather_data(location, category, days_requested):
 
 
 # Initialize chat history
+person = Image.open('assets/person.png')
+chatbot = Image.open('assets/chatbot.png')
+
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": welcome_message}]  # Add welcome message
 
 # Display chat history
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    avatar = person if message["role"] == "user" else chatbot
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
 # Accept user input
 if prompt := st.chat_input("Ask me about the weather!"):
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar=person):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -207,7 +213,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
                 location, category, days_requested)
 
     # Display assistant's response with typing effect
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()
         full_response = ""
 
