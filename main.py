@@ -21,7 +21,7 @@ dark_icon_svg = './assets/moon.svg'
 
 # Theme configuration setup
 ms = st.session_state
-if "themes" not in ms: 
+if "themes" not in ms:
     ms.themes = {
         "current_theme": "light",
         "refreshed": True,
@@ -31,7 +31,7 @@ if "themes" not in ms:
             "theme.primaryColor": "#c98bdb",
             "theme.secondaryBackgroundColor": "#5591f5",
             "theme.textColor": "white",
-            "button_face": "🌜"
+            "button_face": "🌙"
         },
         "dark": {
             "theme.base": "light",
@@ -39,19 +39,23 @@ if "themes" not in ms:
             "theme.primaryColor": "#5591f5",
             "theme.secondaryBackgroundColor": "#DEFCF9",
             "theme.textColor": "#0a1464",
-            "button_face": "🌞"
+            "button_face": "☀️"
         },
     }
 
 # Theme toggle function
+
+
 def ChangeTheme():
     previous_theme = ms.themes["current_theme"]
     tdict = ms.themes["light"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]
-    for vkey, vval in tdict.items(): 
-        if vkey.startswith("theme"): st._config.set_option(vkey, vval)
+    for vkey, vval in tdict.items():
+        if vkey.startswith("theme"):
+            st._config.set_option(vkey, vval)
 
     ms.themes["refreshed"] = False
     ms.themes["current_theme"] = "dark" if previous_theme == "light" else "light"
+
 
 btn_face = ms.themes["light"]["button_face"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]["button_face"]
 st.button(btn_face, on_click=ChangeTheme)
@@ -61,20 +65,24 @@ if ms.themes["refreshed"] == False:
     st.rerun()
 
 
-
 # Load city data
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
 
 # Helper function to check for city name in query
+
+
 def contains_city(query):
     words = set(re.findall(r'\w+', query.lower()))
     return bool(words & city_names)
+
 
 # Welcome message
 welcome_message = random.choice(welcome_messages)
 
 # Parsing query for location and forecast type
+
+
 def parse_query(user_query):
     location, category, days_requested = None, "current", 1
 
@@ -84,11 +92,13 @@ def parse_query(user_query):
 
     # Determine category of forecast
     if "aqi" in user_query:
-        category, location = "aqi", re.search(r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
+        category, location = "aqi", re.search(
+            r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
     elif "tomorrow" in user_query:
         category, days_requested = "specific", 1
     elif days_match := re.search(r"(after|for|in) (\d+) days?", user_query):
-        category, days_requested = "specific" if days_match[1] == "after" else "multiple", int(days_match[2])
+        category, days_requested = "specific" if days_match[1] == "after" else "multiple", int(
+            days_match[2])
     elif "this week" in user_query:
         category, days_requested = "multiple", 7
 
@@ -96,10 +106,12 @@ def parse_query(user_query):
     if not location:
         location = re.search(r"weather in (.+)", user_query)
     location = location.group(1).strip() if location else "unknown location"
-    
+
     return location, category, days_requested
 
 # Retrieve weather data based on category
+
+
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
@@ -135,11 +147,14 @@ def get_weather_data(location, category, days_requested):
     except requests.exceptions.RequestException:
         return "Unable to fetch weather data. Check back later."
 
+
 # Chat history and user input handling
-person, chatbot = Image.open('assets/person.png'), Image.open('assets/chatbot.png')
+person, chatbot = Image.open(
+    'assets/person.png'), Image.open('assets/chatbot.png')
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": welcome_message}]
+    st.session_state.messages = [
+        {"role": "assistant", "content": welcome_message}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=person if message["role"] == "user" else chatbot):
@@ -154,7 +169,8 @@ if prompt := st.chat_input("Ask me about the weather!"):
     lower_prompt = " " + prompt.lower()
     if any(city in lower_prompt for city in city_names):
         location, category, days_requested = parse_query(prompt)
-        assistant_response = get_weather_data(location, category, days_requested) if location != "unknown location" else "Please specify a location."
+        assistant_response = get_weather_data(
+            location, category, days_requested) if location != "unknown location" else "Please specify a location."
     elif any(greet in lower_prompt for greet in greetings):
         assistant_response = random.choice(greeting_responses)
     elif any(query in lower_prompt for query in general_queries):
@@ -165,7 +181,8 @@ if prompt := st.chat_input("Ask me about the weather!"):
         assistant_response = random.choice(farewell_responses)
     else:
         location, category, days_requested = parse_query(prompt)
-        assistant_response = get_weather_data(location, category, days_requested) if location != "unknown location" else "Please specify a location."
+        assistant_response = get_weather_data(
+            location, category, days_requested) if location != "unknown location" else "Please specify a location."
 
     with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()
@@ -175,4 +192,5 @@ if prompt := st.chat_input("Ask me about the weather!"):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.session_state.messages.append(
+            {"role": "assistant", "content": full_response})
