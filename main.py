@@ -16,203 +16,145 @@ st.title("Weather Daily")
 st.caption(
     "Find the current weather, forecast the future or find the AQI in your region seamlessly.")
 
+light_icon_svg = './assets/sun.svg'
+dark_icon_svg = './assets/moon.svg'
+
+# Theme configuration setup
+ms = st.session_state
+if "themes" not in ms: 
+    ms.themes = {
+        "current_theme": "light",
+        "refreshed": True,
+        "light": {
+            "theme.base": "dark",
+            "theme.backgroundColor": "black",
+            "theme.primaryColor": "#c98bdb",
+            "theme.secondaryBackgroundColor": "#5591f5",
+            "theme.textColor": "white",
+            "button_face": "🌜"
+        },
+        "dark": {
+            "theme.base": "light",
+            "theme.backgroundColor": "white",
+            "theme.primaryColor": "#5591f5",
+            "theme.secondaryBackgroundColor": "#DEFCF9",
+            "theme.textColor": "#0a1464",
+            "button_face": "🌞"
+        },
+    }
+
+# Theme toggle function
+def ChangeTheme():
+    previous_theme = ms.themes["current_theme"]
+    tdict = ms.themes["light"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]
+    for vkey, vval in tdict.items(): 
+        if vkey.startswith("theme"): st._config.set_option(vkey, vval)
+
+    ms.themes["refreshed"] = False
+    ms.themes["current_theme"] = "dark" if previous_theme == "light" else "light"
+
+btn_face = ms.themes["light"]["button_face"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]["button_face"]
+st.button(btn_face, on_click=ChangeTheme)
+
+if ms.themes["refreshed"] == False:
+    ms.themes["refreshed"] = True
+    st.rerun()
+
+
+
+# Load city data
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
 
-
+# Helper function to check for city name in query
 def contains_city(query):
-    words = set(re.findall(r'\w+', query.lower()))  # Split query into words
-    # Check for intersection between words and city names
+    words = set(re.findall(r'\w+', query.lower()))
     return bool(words & city_names)
-
 
 # Welcome message
 welcome_message = random.choice(welcome_messages)
 
-# Function to parse user input for location and type of request
-
-
+# Parsing query for location and forecast type
 def parse_query(user_query):
-
-    location = None
-    category = "current"  # Default to current weather
-    days_requested = 1    # Default to 1 day for single-day forecasts
+    location, category, days_requested = None, "current", 1
 
     user_query = user_query.lower()
-    # Adding a prefix if not present
     if "weather in" not in user_query:
         user_query = "weather in " + user_query
 
     # Determine category of forecast
     if "aqi" in user_query:
-        category = "aqi"
-        location_match = re.search(r"aqi in (.+)", user_query)
-        if location_match == None:
-            location_match = re.search(r"(.+) aqi", user_query)
-        if location_match:
-            location = location_match.group(1).strip()
-        else:
-            location = "unknown location"
-
-    if "tomorrow" in user_query:
-        category = "specific"
-        days_requested = 1
-    elif "after" in user_query:
-        days_match = re.search(r"after (\d+) days?", user_query)
-        if days_match:
-            category = "specific"
-            days_requested = int(days_match.group(1))
-    elif "for" in user_query:
-        days_match = re.search(r"for (\d+) days?", user_query)
-        if days_match:
-            category = "multiple"
-            days_requested = int(days_match.group(1))
-    elif "in" in user_query:
-        days_match = re.search(r"in (\d+) days?", user_query)
-        if days_match:
-            category = "multiple"
-            days_requested = int(days_match.group(1))
+        category, location = "aqi", re.search(r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
+    elif "tomorrow" in user_query:
+        category, days_requested = "specific", 1
+    elif days_match := re.search(r"(after|for|in) (\d+) days?", user_query):
+        category, days_requested = "specific" if days_match[1] == "after" else "multiple", int(days_match[2])
     elif "this week" in user_query:
-        category = "multiple"
-        days_requested = 7
+        category, days_requested = "multiple", 7
 
-    # Extract the location
-    location_match = re.search(r"weather in (.+)", user_query)
-    if location_match:
-        location = location_match.group(1).strip()
-    else:
-        location = "unknown location"
-
+    # Extract location if not set
+    if not location:
+        location = re.search(r"weather in (.+)", user_query)
+    location = location.group(1).strip() if location else "unknown location"
+    
     return location, category, days_requested
 
-# Function to get weather data based on category
-
-
+# Retrieve weather data based on category
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
     api_key = "ff77f4dadf90414895e164755240511"  # Replace with your API key
 
-    if category == "current":  # Current weather
-        api_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=no"
-    elif category == "aqi":     # AQI
-        api_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=yes"
-    else:  # Future weather forecast (specific or multiple days)
-        days_to_fetch = min(days_requested, 10)  # Cap at 10 days
-        api_url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
+    # API URL setup based on forecast type
+    days_to_fetch = min(days_requested, 10)
+    api_url = (
+        f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi={'yes' if category == 'aqi' else 'no'}"
+        if category == "current" or category == "aqi"
+        else f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
+    )
 
+    # Get and parse response
     try:
-        response = requests.get(api_url)
-        response.raise_for_status()
-        data = response.json()
-
-        location_name = data['location']['name']
-        region = data['location']['region']
-        country = data['location']['country']
+        data = requests.get(api_url).json()
+        location_info = f"{data['location']['name'].title()}, {data['location']['region']}, {data['location']['country']}"
 
         if category == "current":
-            # Extract current weather data
-            temp_celsius = data['current']['temp_c']
-            feels_like = data['current']['feelslike_c']
-            condition = data['current']['condition']['text']
-            humidity = data['current']['humidity']
-            wind_speed_kph = data['current']['wind_kph']
-            precipitation = data['current']['precip_mm']
-            local_time = data['location']['localtime']
-
-            return (f"The current weather in {location_name.title()}, {region}, {country} (as of {local_time}):\n"
-                    f"- Condition: {condition}\n"
-                    f"- Temperature: {temp_celsius}°C\n"
-                    f"- Feels like: {feels_like}°C\n"
-                    f"- Humidity: {humidity}%\n"
-                    f"- Wind Speed: {wind_speed_kph} kph\n"
-                    f"- Precipitation: {precipitation} mm")
-
+            curr = data['current']
+            return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n- {curr['condition']['text']}\n- Temp: {curr['temp_c']}°C\n- Feels like: {curr['feelslike_c']}°C\n- Humidity: {curr['humidity']}%\n- Wind: {curr['wind_kph']} kph\n- Precipitation: {curr['precip_mm']} mm"
         elif category == "specific":
-            # Extract forecast for a specific future day
-            forecast_day = data['forecast']['forecastday'][-1]
-            date = forecast_day['date']
-            condition = forecast_day['day']['condition']['text']
-            max_temp = forecast_day['day']['maxtemp_c']
-            min_temp = forecast_day['day']['mintemp_c']
-            chance_of_rain = forecast_day['day'].get('daily_chance_of_rain', 0)
-
-            return (f"Weather forecast for {location_name.title()}, {region}, {country} on {date}:\n"
-                    f"- Condition: {condition}\n"
-                    f"- Max Temperature: {max_temp}°C\n"
-                    f"- Min Temperature: {min_temp}°C\n"
-                    f"- Chance of Rain: {chance_of_rain}%")
-
+            forecast = data['forecast']['forecastday'][-1]
+            return f"Forecast for {location_info} on {forecast['date']}:\n- {forecast['day']['condition']['text']}\n- Max Temp: {forecast['day']['maxtemp_c']}°C\n- Min Temp: {forecast['day']['mintemp_c']}°C\n- Chance of Rain: {forecast['day'].get('daily_chance_of_rain', 0)}%"
         elif category == "multiple":
-            # Extract multi-day forecast data
-
-            forecast_days = data['forecast']['forecastday']
-            forecast_summary = f"Weather forecast for {location_name.title()}, {region}, {country}: \n\n"
-
-            for day in forecast_days:
-                date = day['date']
-                condition = day['day']['condition']['text']
-                max_temp = day['day']['maxtemp_c']
-                min_temp = day['day']['mintemp_c']
-                chance_of_rain = day['day'].get('daily_chance_of_rain', 0)
-                forecast_summary += (f"Date: {date}\n"
-                                     f"- Condition: {condition}\n"
-                                     f"- Max Temperature: {max_temp}°C\n"
-                                     f"- Min Temperature: {min_temp}°C\n"
-                                     f"- Chance of Rain: {chance_of_rain}%\n\n")
-
+            forecast_summary = f"Multi-day forecast for {location_info}:\n\n"
+            for day in data['forecast']['forecastday']:
+                forecast_summary += f"Date: {day['date']} - {day['day']['condition']['text']} - Max: {day['day']['maxtemp_c']}°C, Min: {day['day']['mintemp_c']}°C, Rain: {day['day'].get('daily_chance_of_rain', 0)}%\n"
             return forecast_summary.strip()
-
         elif category == "aqi":
-            pm2_5 = data['current']['air_quality']['pm2_5']
-            pm10 = data['current']['air_quality']['pm10']
-            co = data['current']['air_quality']['co']
-            no2 = data['current']['air_quality']['no2']
-            o3 = data['current']['air_quality']['o3']
-            so2 = data['current']['air_quality']['so2']
-
-            return (f'''Air Quality Index (AQI) for {location_name.title()}, {region}, {country}: 
-                    - PM 2.5: {pm2_5}
-                    - PM 10: {pm10}
-                    - CO: {co}
-                    - NO₂: {no2}
-                    - O₃: {o3}
-                    - SO₂: {so2}''')
-
+            aq = data['current']['air_quality']
+            return f"AQI for {location_info}:\n- PM 2.5: {aq['pm2_5']}\n- PM 10: {aq['pm10']}\n- CO: {aq['co']}\n- NO₂: {aq['no2']}\n- O₃: {aq['o3']}\n- SO₂: {aq['so2']}"
     except requests.exceptions.RequestException:
-        return "I'm unable to fetch live weather data right now. Please check a weather app for the latest information."
+        return "Unable to fetch weather data. Check back later."
 
-
-# Initialize chat history
-person = Image.open('assets/person.png')
-chatbot = Image.open('assets/chatbot.png')
+# Chat history and user input handling
+person, chatbot = Image.open('assets/person.png'), Image.open('assets/chatbot.png')
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": welcome_message}]  # Add welcome message
+    st.session_state.messages = [{"role": "assistant", "content": welcome_message}]
 
-# Display chat history
 for message in st.session_state.messages:
-    avatar = person if message["role"] == "user" else chatbot
-    with st.chat_message(message["role"], avatar=avatar):
+    with st.chat_message(message["role"], avatar=person if message["role"] == "user" else chatbot):
         st.markdown(message["content"])
 
-# Accept user input
 if prompt := st.chat_input("Ask me about the weather!"):
     with st.chat_message("user", avatar=person):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Check if user input is a greeting or a general query
+    # Handle user queries, prioritizing city names in query
     lower_prompt = " " + prompt.lower()
     if any(city in lower_prompt for city in city_names):
         location, category, days_requested = parse_query(prompt)
-        # Get response based on parsed data
-        if location == "unknown location":
-            assistant_response = "Please specify a location."
-        else:
-            assistant_response = get_weather_data(
-                location, category, days_requested)
+        assistant_response = get_weather_data(location, category, days_requested) if location != "unknown location" else "Please specify a location."
     elif any(greet in lower_prompt for greet in greetings):
         assistant_response = random.choice(greeting_responses)
     elif any(query in lower_prompt for query in general_queries):
@@ -223,24 +165,14 @@ if prompt := st.chat_input("Ask me about the weather!"):
         assistant_response = random.choice(farewell_responses)
     else:
         location, category, days_requested = parse_query(prompt)
-        # Get response based on parsed data
-        if location == "unknown location":
-            assistant_response = "Please specify a location."
-        else:
-            assistant_response = get_weather_data(
-                location, category, days_requested)
+        assistant_response = get_weather_data(location, category, days_requested) if location != "unknown location" else "Please specify a location."
 
-    # Display assistant's response with typing effect
     with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()
         full_response = ""
-
-        # Simulate typing effect
         for chunk in assistant_response.split():
             full_response += chunk + " "
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
-
         message_placeholder.markdown(full_response)
-        st.session_state.messages.append(
-            {"role": "assistant", "content": full_response})
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
