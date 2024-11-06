@@ -5,6 +5,7 @@ import re
 import random
 from small_talk import *
 from PIL import Image
+import pandas as pd
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -12,7 +13,18 @@ st.set_page_config(
 )
 
 st.title("Weather Daily")
-st.caption("Find the current weather, forecast the future or find the AQI in your region seamlessly.")
+st.caption(
+    "Find the current weather, forecast the future or find the AQI in your region seamlessly.")
+
+cities_df = pd.read_csv('./assets/world-cities.csv')
+city_names = set(cities_df["name"].str.lower())
+
+
+def contains_city(query):
+    words = set(re.findall(r'\w+', query.lower()))  # Split query into words
+    # Check for intersection between words and city names
+    return bool(words & city_names)
+
 
 # Welcome message
 welcome_message = random.choice(welcome_messages)
@@ -193,7 +205,15 @@ if prompt := st.chat_input("Ask me about the weather!"):
 
     # Check if user input is a greeting or a general query
     lower_prompt = " " + prompt.lower()
-    if any(greet in lower_prompt for greet in greetings):
+    if any(city in lower_prompt for city in city_names):
+        location, category, days_requested = parse_query(prompt)
+        # Get response based on parsed data
+        if location == "unknown location":
+            assistant_response = "Please specify a location."
+        else:
+            assistant_response = get_weather_data(
+                location, category, days_requested)
+    elif any(greet in lower_prompt for greet in greetings):
         assistant_response = random.choice(greeting_responses)
     elif any(query in lower_prompt for query in general_queries):
         assistant_response = random.choice(general_query_responses)
@@ -202,9 +222,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
     elif any(farewell in lower_prompt for farewell in farewells):
         assistant_response = random.choice(farewell_responses)
     else:
-        # Parse user query for location and day
         location, category, days_requested = parse_query(prompt)
-
         # Get response based on parsed data
         if location == "unknown location":
             assistant_response = "Please specify a location."
