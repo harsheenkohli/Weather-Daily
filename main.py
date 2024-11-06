@@ -19,17 +19,27 @@ welcome_message = random.choice(welcome_messages)
 
 
 def parse_query(user_query):
+
     location = None
     category = "current"  # Default to current weather
     days_requested = 1    # Default to 1 day for single-day forecasts
 
     user_query = user_query.lower()
-
     # Adding a prefix if not present
     if "weather in" not in user_query:
         user_query = "weather in " + user_query
 
     # Determine category of forecast
+    if "aqi" in user_query:
+        category = "aqi"
+        location_match = re.search(r"aqi in (.+)", user_query)
+        if location_match == None:
+            location_match = re.search(r"(.+) aqi", user_query)
+        if location_match:
+            location = location_match.group(1).strip()
+        else:
+            location = "unknown location"
+    
     if "tomorrow" in user_query:
         category = "specific"
         days_requested = 1
@@ -71,6 +81,8 @@ def get_weather_data(location, category, days_requested):
 
     if category == "current":  # Current weather
         api_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=no"
+    elif category == "aqi":     # AQI
+        api_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=yes"
     else:  # Future weather forecast (specific or multiple days)
         days_to_fetch = min(days_requested, 10)  # Cap at 10 days
         api_url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
@@ -80,11 +92,12 @@ def get_weather_data(location, category, days_requested):
         response.raise_for_status()
         data = response.json()
 
+        location_name = data['location']['name']
+        region = data['location']['region']
+        country = data['location']['country']
+
         if category == "current":
             # Extract current weather data
-            location_name = data['location']['name']
-            region = data['location']['region']
-            country = data['location']['country']
             temp_celsius = data['current']['temp_c']
             feels_like = data['current']['feelslike_c']
             condition = data['current']['condition']['text']
@@ -104,15 +117,13 @@ def get_weather_data(location, category, days_requested):
         elif category == "specific":
             # Extract forecast for a specific future day
             forecast_day = data['forecast']['forecastday'][-1]
-            region = data['location']['region']
-            country = data['location']['country']
             date = forecast_day['date']
             condition = forecast_day['day']['condition']['text']
             max_temp = forecast_day['day']['maxtemp_c']
             min_temp = forecast_day['day']['mintemp_c']
             chance_of_rain = forecast_day['day'].get('daily_chance_of_rain', 0)
 
-            return (f"Weather forecast for {location.title()}, {region}, {country} on {date}:\n"
+            return (f"Weather forecast for {location_name.title()}, {region}, {country} on {date}:\n"
                     f"- Condition: {condition}\n"
                     f"- Max Temperature: {max_temp}°C\n"
                     f"- Min Temperature: {min_temp}°C\n"
@@ -120,10 +131,9 @@ def get_weather_data(location, category, days_requested):
 
         elif category == "multiple":
             # Extract multi-day forecast data
+            
             forecast_days = data['forecast']['forecastday']
-            region = data['location']['region']
-            country = data['location']['country']
-            forecast_summary = f"Weather forecast for {location.title()}, {region}, {country}: \n\n"
+            forecast_summary = f"Weather forecast for {location_name.title()}, {region}, {country}: \n\n"
 
             for day in forecast_days:
                 date = day['date']
@@ -138,6 +148,22 @@ def get_weather_data(location, category, days_requested):
                                      f"- Chance of Rain: {chance_of_rain}%\n\n")
 
             return forecast_summary.strip()
+
+        elif category == "aqi":
+            pm2_5 = data['current']['air_quality']['pm2_5']
+            pm10 = data['current']['air_quality']['pm10']
+            co = data['current']['air_quality']['co']
+            no2 = data['current']['air_quality']['no2']
+            o3 = data['current']['air_quality']['o3']
+            so2 = data['current']['air_quality']['so2']
+
+            return (f'''Air Quality Index (AQI) for {location_name.title()}, {region}, {country}: 
+                    - PM 2.5: {pm2_5}
+                    - PM 10: {pm10}
+                    - CO: {co}
+                    - NO₂: {no2}
+                    - O₃: {o3}
+                    - SO₂: {so2}''')
 
     except requests.exceptions.RequestException:
         return "I'm unable to fetch live weather data right now. Please check a weather app for the latest information."
@@ -160,7 +186,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     # Check if user input is a greeting or a general query
-    lower_prompt = prompt.lower()
+    lower_prompt = " " + prompt.lower()
     if any(greet in lower_prompt for greet in greetings):
         assistant_response = random.choice(greeting_responses)
     elif any(query in lower_prompt for query in general_queries):

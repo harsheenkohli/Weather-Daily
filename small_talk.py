@@ -1,24 +1,25 @@
 # List of general phrases to respond to
 
 greetings = [
-    "hi", "hello", "hey", "greetings", "what's up",
-    "howdy", "salutations", "yo", "ahoy", "hi there"
+    " hi", " hello", " hey", " greetings", " what's up",
+    " howdy", " salutations", " yo", " ahoy", " hi there",
+    " good morning", " good evening", " good afternoon"
 ]
 
 farewells = [
-    "bye", "goodbye", "see you", "take care", "farewell", "no thanks", "nothing",
-    "later", "catch you later", "have a nice day", "adios", "until next time"
+    " bye", " goodbye", " see you", " take care", " farewell", " no thanks", " nothing",
+    " later", " catch you later", " have a nice day", " adios", " until next time"
 ]
 
 thanks_phrases = [
-    "thanks", "thank you", "thanks a lot", "many thanks", "appreciate it",
-    "thank you very much", "thanks for your help", "grateful", "cheers"
+    " thanks", " thank you", " thanks a lot", " many thanks", " appreciate it",
+    " thank you very much", " thanks for your help", " grateful", " cheers"
 ]
 
 general_queries = [
-    "how are you", "how are you doing", "what's going on", "how's it going",
-    "how's everything", "what's new", "how have you been", "how's life",
-    "what's happening", "how's your day"
+    " how are you", " how are you doing", " what's going on", " how's it going",
+    " how's everything", " what's new", " how have you been", " how's life",
+    " what's happening", " how's your day"
 ]
 
 greeting_responses = [
