@@ -6,6 +6,12 @@ import random
 from small_talk import *
 from PIL import Image
 import pandas as pd
+# import kagglehub
+
+# # Download latest version
+# path = kagglehub.dataset_download('./assets')
+
+# print("Path to dataset files:", path)
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -16,9 +22,6 @@ st.title("Weather Daily")
 st.caption(
     "Find the current weather, forecast the future or find the AQI in your region seamlessly.")
 
-light_icon_svg = './assets/sun.svg'
-dark_icon_svg = './assets/moon.svg'
-
 # Theme configuration setup
 ms = st.session_state
 if "themes" not in ms:
@@ -27,7 +30,7 @@ if "themes" not in ms:
         "refreshed": True,
         "light": {
             "theme.base": "dark",
-            "theme.backgroundColor": "black",
+            "theme.backgroundColor": "#2c313c",
             "theme.primaryColor": "#c98bdb",
             "theme.secondaryBackgroundColor": "#5591f5",
             "theme.textColor": "white",
@@ -115,7 +118,7 @@ def parse_query(user_query):
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
-    api_key = "ff77f4dadf90414895e164755240511"  # Replace with your API key
+    api_key = "ff77f4dadf90414895e164755240511"  # Replace with your actual API key
 
     # API URL setup based on forecast type
     days_to_fetch = min(days_requested, 10)
@@ -125,11 +128,23 @@ def get_weather_data(location, category, days_requested):
         else f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
     )
 
-    # Get and parse response
     try:
-        data = requests.get(api_url).json()
+        response = requests.get(api_url)
+        data = response.json()
+
+        # Check for API error response
+        if response.status_code != 200 or 'error' in data:
+            error_message = data.get('error', {}).get(
+                'message', 'Unknown error occurred')
+            return f"Error fetching weather data: {error_message}"
+
+        # Ensure 'location' key exists
+        if 'location' not in data:
+            return "Error: Unable to retrieve location information."
+
         location_info = f"{data['location']['name'].title()}, {data['location']['region']}, {data['location']['country']}"
 
+        # Handle different categories
         if category == "current":
             curr = data['current']
             return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n- {curr['condition']['text']}\n- Temp: {curr['temp_c']}°C\n- Feels like: {curr['feelslike_c']}°C\n- Humidity: {curr['humidity']}%\n- Wind: {curr['wind_kph']} kph\n- Precipitation: {curr['precip_mm']} mm"
@@ -144,8 +159,10 @@ def get_weather_data(location, category, days_requested):
         elif category == "aqi":
             aq = data['current']['air_quality']
             return f"AQI for {location_info}:\n- PM 2.5: {aq['pm2_5']}\n- PM 10: {aq['pm10']}\n- CO: {aq['co']}\n- NO₂: {aq['no2']}\n- O₃: {aq['o3']}\n- SO₂: {aq['so2']}"
-    except requests.exceptions.RequestException:
-        return "Unable to fetch weather data. Check back later."
+    except requests.exceptions.RequestException as e:
+        return f"Unable to fetch weather data due to a network error: {str(e)}"
+    except KeyError as e:
+        return f"Unable to find weather data for this location."
 
 
 # Chat history and user input handling
