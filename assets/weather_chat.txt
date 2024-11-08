@@ -1,0 +1,104 @@
+What is the weather like today?
+Does it seem cloudy?
+What was the weather in my city yesterday?
+What does the future weather seem like?
+What’s the temperature like today?
+Is it raining in my area right now?
+Will tomorrow be sunny?
+How is the air quality in my city at the moment?
+What does the weekend forecast look like?
+Did it snow in the mountains yesterday?
+Are there any storms expected this evening?
+Will there be strong winds tonight?
+How is the visibility for today’s commute?
+What’s the climate like in January here?
+Was it foggy in the morning yesterday?
+Are the skies clear or cloudy right now?
+What’s the expected humidity level for tomorrow?
+How is the AQI this afternoon?
+Will the weather be suitable for a picnic on Saturday?
+What’s the forecast for the next five days?
+How cold did it get last night?
+Is it expected to be humid next week?
+What’s the current wind speed?
+Was there a thunderstorm in the area overnight?
+Will it be hot next weekend?
+What time is sunrise tomorrow?
+How much rain is expected today?
+What is the current UV index?
+What was the temperature this morning?
+Will the heatwave continue this week?
+Is there a chance of rain on Tuesday?
+Is it safe to go outside given today’s air quality?
+Will there be any snowfall tonight?
+How chilly was it in the early hours?
+Is there fog on the horizon this morning?
+Can I expect high pollen levels tomorrow?
+What’s the weather like next weekend?
+Is there a frost advisory tonight?
+What’s the predicted temperature for next Monday?
+Is there a heavy downpour expected today?
+How’s the climate expected to change over summer?
+Will there be thunderstorms this afternoon?
+Is today a good day for outdoor sports?
+How warm will it get during the afternoon?
+Are there any air quality alerts for my region?
+What was the visibility level last night?
+Will it be breezy this evening?
+Is a cold front moving in next week?
+What was the maximum temperature yesterday?
+What’s the extended forecast for the rest of the month?
+Are there severe weather warnings for tomorrow?
+Will it feel muggy tonight?
+How likely is it to hail today?
+Was there lightning last night in my area?
+Is the barometric pressure stable today?
+How low will temperatures dip tonight?
+What will the sunrise and sunset times be tomorrow?
+Is there a high pollen count predicted for Friday?
+Will it drizzle in the late evening?
+What’s the dew point today?
+Is the AQI expected to improve by tonight?
+Is there any precipitation forecasted for the weekend?
+How dry is the air this morning?
+Will the fog clear up by noon?
+Is there any chance of a heatwave next month?
+Is it too windy to go cycling today?
+What’s the general climate like in February here?
+What are the chances of a thunderstorm in the afternoon?
+How severe is the pollen level right now?
+Will there be clear skies for the event on Sunday?
+Are we expecting any snow showers tomorrow?
+How high is the humidity today?
+Is the temperature dropping overnight?
+Are there storm clouds expected in the afternoon?
+Will the air quality be hazardous tomorrow?
+How long will this rainy weather last?
+Was there a significant temperature shift yesterday?
+Is there a freeze warning in effect tonight?
+What’s the high temperature expected to be next Thursday?
+Will it be overcast on Wednesday?
+How intense was the rainfall last night?
+Is there a tropical storm moving in soon?
+Will temperatures reach above 80°F today?
+Are thunderstorms likely this week?
+Was the visibility affected by fog yesterday?
+Will the humidity level decrease tomorrow?
+Is there any snow forecasted for the holidays?
+What is the weather trend for the next month?
+Is the forecast calling for sunshine on Monday?
+Are we expecting a dust storm this week?
+How long will the current high-pressure system stay?
+Will it be mostly sunny or partly cloudy today?
+Is there a chance of freezing rain tomorrow night?
+What’s the historical average temperature in March?
+How much snow accumulation is expected by morning?
+Is there a wind advisory for the coastal areas today?
+How low did the AQI drop last night?
+What are the peak temperatures predicted for next week?
+Are we under any weather advisories right now?
+Will there be rain showers this evening?
+What’s the projected dew point for tomorrow?
+How intense will the UV radiation be at noon?
+Are there any weather hazards for the upcoming days?
+What’s the long-term climate outlook for summer?
