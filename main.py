@@ -7,12 +7,11 @@ from small_talk import *
 from PIL import Image
 import pandas as pd
 import joblib
-# import kagglehub
+from dotenv import load_dotenv
+import os
 
-# # Download latest version
-# path = kagglehub.dataset_download('./assets')
-
-# print("Path to dataset files:", path)
+load_dotenv()
+api_key = os.getenv('API_KEY')
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -126,7 +125,6 @@ def parse_query(user_query):
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
-    api_key = st.secrets["weather_api"]["key"] 
 
     # API URL setup based on forecast type
     days_to_fetch = min(days_requested, 10)
