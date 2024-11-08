@@ -126,7 +126,7 @@ def parse_query(user_query):
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
-    api_key = "ff77f4dadf90414895e164755240511"  # Replace with your actual API key
+    api_key = st.secrets["weather_api"]["key"] 
 
     # API URL setup based on forecast type
     days_to_fetch = min(days_requested, 10)
