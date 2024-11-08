@@ -6,6 +6,7 @@ import random
 from small_talk import *
 from PIL import Image
 import pandas as pd
+import joblib
 # import kagglehub
 
 # # Download latest version
@@ -82,6 +83,13 @@ def contains_city(query):
 
 # Welcome message
 welcome_message = random.choice(welcome_messages)
+
+model = joblib.load('./assets/svm_model.joblib') 
+
+def classify_text(user_input):
+    prediction = model.predict([user_input])[0]
+    return prediction
+
 
 # Parsing query for location and forecast type
 
@@ -182,25 +190,28 @@ if prompt := st.chat_input("Ask me about the weather!"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Handle user queries, prioritizing city names in query
-    lower_prompt = " " + prompt.lower()
-    if any(city in lower_prompt for city in city_names):
-        location, category, days_requested = parse_query(prompt)
-        assistant_response = get_weather_data(
-            location, category, days_requested) if location != "unknown location" else "Please specify a location."
-    elif any(greet in lower_prompt for greet in greetings):
-        assistant_response = random.choice(greeting_responses)
-    elif any(query in lower_prompt for query in general_queries):
-        assistant_response = random.choice(general_query_responses)
-    elif any(thank in lower_prompt for thank in thanks_phrases):
-        assistant_response = random.choice(thanks_responses)
-    elif any(farewell in lower_prompt for farewell in farewells):
-        assistant_response = random.choice(farewell_responses)
-    else:
-        location, category, days_requested = parse_query(prompt)
-        assistant_response = get_weather_data(
-            location, category, days_requested) if location != "unknown location" else "Please specify a location."
+    # Classify the user input
+    user_query_type = classify_text(prompt)
 
+    if user_query_type == "weather":
+        # Weather-related response
+        location, category, days_requested = parse_query(prompt)
+        assistant_response = get_weather_data(
+            location, category, days_requested) if location != "unknown location" else "Please specify a location."
+    else:
+        # Casual response (small talk)
+        if any(greet in prompt.lower() for greet in greetings):
+            assistant_response = random.choice(greeting_responses)
+        elif any(query in prompt.lower() for query in general_queries):
+            assistant_response = random.choice(general_query_responses)
+        elif any(thank in prompt.lower() for thank in thanks_phrases):
+            assistant_response = random.choice(thanks_responses)
+        elif any(farewell in prompt.lower() for farewell in farewells):
+            assistant_response = random.choice(farewell_responses)
+        else:
+            assistant_response = "I'm here to help! Ask me anything about the weather."
+
+    # Display the response in the chat
     with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()
         full_response = ""
