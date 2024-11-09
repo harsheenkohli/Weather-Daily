@@ -2,4 +2,4 @@ pandas
 scikit-learn
 joblib
 streamlit
-python-dotenv
+# python-dotenv

@@ -7,11 +7,11 @@ from small_talk import *
 from PIL import Image
 import pandas as pd
 import joblib
-from dotenv import load_dotenv
-import os
+# from dotenv import load_dotenv
+# import os
 
-load_dotenv()
-api_key = "c7108bb07dc44bf08a1104810240911"
+# load_dotenv()
+api_key = st.secrets['API_KEY']
 
 st.set_page_config(
     page_title="Weather Daily",
