@@ -8,12 +8,13 @@ greetings = [
 
 farewells = [
     " bye", " goodbye", " see you", " take care", " farewell", " no thanks", " nothing",
-    " later", " catch you later", " have a nice day", " adios", " until next time"
+    " later", " catch you later", " have a nice day", " adios", " until next time", " see you later",
+    " back later"
 ]
 
 thanks_phrases = [
     " thanks", " thank you", " thanks a lot", " many thanks", " appreciate it",
-    " thank you very much", " thanks for your help", " grateful", " cheers"
+    " thank you very much", " thanks for your help", " grateful", " cheers", " helpful"
 ]
 
 general_queries = [

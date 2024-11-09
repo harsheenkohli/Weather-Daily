@@ -7,10 +7,8 @@ from small_talk import *
 from PIL import Image
 import pandas as pd
 import joblib
-# from dotenv import load_dotenv
-# import os
+from fuzzywuzzy import fuzz, process
 
-# load_dotenv()
 api_key = st.secrets['API_KEY']
 
 st.set_page_config(
@@ -19,8 +17,7 @@ st.set_page_config(
 )
 
 st.title("Weather Daily")
-st.caption(
-    "Find the current weather, forecast the future or find the AQI in your region seamlessly.")
+st.caption("Find the current weather, forecast the future or find the AQI in your region seamlessly.")
 
 # Theme configuration setup
 ms = st.session_state
@@ -46,9 +43,6 @@ if "themes" not in ms:
         },
     }
 
-# Theme toggle function
-
-
 def ChangeTheme():
     previous_theme = ms.themes["current_theme"]
     tdict = ms.themes["light"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]
@@ -59,7 +53,6 @@ def ChangeTheme():
     ms.themes["refreshed"] = False
     ms.themes["current_theme"] = "dark" if previous_theme == "light" else "light"
 
-
 btn_face = ms.themes["light"]["button_face"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]["button_face"]
 st.button(btn_face, on_click=ChangeTheme)
 
@@ -67,20 +60,13 @@ if ms.themes["refreshed"] == False:
     ms.themes["refreshed"] = True
     st.rerun()
 
-
-# Load city data
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
-
-# Helper function to check for city name in query
-
 
 def contains_city(query):
     words = set(re.findall(r'\w+', query.lower()))
     return bool(words & city_names)
 
-
-# Welcome message
 welcome_message = random.choice(welcome_messages)
 
 model = joblib.load('./assets/svm_model.joblib') 
@@ -89,44 +75,27 @@ def classify_text(user_input):
     prediction = model.predict([user_input])[0]
     return prediction
 
-
-# Parsing query for location and forecast type
-
-
 def parse_query(user_query):
     location, category, days_requested = None, "current", 1
-
     user_query = user_query.lower()
     if "weather in" not in user_query:
         user_query = "weather in " + user_query
-
-    # Determine category of forecast
     if "aqi" in user_query:
-        category, location = "aqi", re.search(
-            r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
+        category, location = "aqi", re.search(r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
     elif "tomorrow" in user_query:
         category, days_requested = "specific", 1
     elif days_match := re.search(r"(after|for|in) (\d+) days?", user_query):
-        category, days_requested = "specific" if days_match[1] == "after" else "multiple", int(
-            days_match[2])
+        category, days_requested = "specific" if days_match[1] == "after" else "multiple", int(days_match[2])
     elif "this week" in user_query:
         category, days_requested = "multiple", 7
-
-    # Extract location if not set
     if not location:
         location = re.search(r"weather in (.+)", user_query)
     location = location.group(1).strip() if location else "unknown location"
-
     return location, category, days_requested
-
-# Retrieve weather data based on category
-
 
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
-
-    # API URL setup based on forecast type
     days_to_fetch = min(days_requested, 10)
     api_url = (
         f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi={'yes' if category == 'aqi' else 'no'}"
@@ -137,20 +106,14 @@ def get_weather_data(location, category, days_requested):
     try:
         response = requests.get(api_url)
         data = response.json()
-
-        # Check for API error response
         if response.status_code != 200 or 'error' in data:
-            error_message = data.get('error', {}).get(
-                'message', 'Unknown error occurred')
+            error_message = data.get('error', {}).get('message', 'Unknown error occurred')
             return f"Error fetching weather data: {error_message}"
-
-        # Ensure 'location' key exists
         if 'location' not in data:
             return "Error: Unable to retrieve location information."
 
         location_info = f"{data['location']['name'].title()}, {data['location']['region']}, {data['location']['country']}"
 
-        # Handle different categories
         if category == "current":
             curr = data['current']
             return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n- {curr['condition']['text']}\n- Temp: {curr['temp_c']}°C\n- Feels like: {curr['feelslike_c']}°C\n- Humidity: {curr['humidity']}%\n- Wind: {curr['wind_kph']} kph\n- Precipitation: {curr['precip_mm']} mm"
@@ -170,46 +133,42 @@ def get_weather_data(location, category, days_requested):
     except KeyError as e:
         return f"Unable to find weather data for this location."
 
-
-# Chat history and user input handling
-person, chatbot = Image.open(
-    'assets/person.png'), Image.open('assets/chatbot.png')
+person, chatbot = Image.open('assets/person.png'), Image.open('assets/chatbot.png')
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "assistant", "content": welcome_message}]
+    st.session_state.messages = [{"role": "assistant", "content": welcome_message}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=person if message["role"] == "user" else chatbot):
         st.markdown(message["content"])
+
+def get_best_match(prompt, category_list, threshold=75):
+    match, score = process.extractOne(prompt.lower(), category_list, scorer=fuzz.ratio)
+    return match if score >= threshold else None
 
 if prompt := st.chat_input("Ask me about the weather!"):
     with st.chat_message("user", avatar=person):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Classify the user input
     user_query_type = classify_text(prompt)
 
     if user_query_type == "weather":
-        # Weather-related response
         location, category, days_requested = parse_query(prompt)
-        assistant_response = get_weather_data(
-            location, category, days_requested) if location != "unknown location" else "Please specify a location."
+        assistant_response = get_weather_data(location, category, days_requested) if location != "unknown location" else "Please specify a location."
     else:
-        # Casual response (small talk)
-        if any(greet in prompt.lower() for greet in greetings):
+        # Fuzzy matching for small talk
+        if get_best_match(prompt, greetings):
             assistant_response = random.choice(greeting_responses)
-        elif any(query in prompt.lower() for query in general_queries):
+        elif get_best_match(prompt, general_queries):
             assistant_response = random.choice(general_query_responses)
-        elif any(thank in prompt.lower() for thank in thanks_phrases):
+        elif get_best_match(prompt, thanks_phrases):
             assistant_response = random.choice(thanks_responses)
-        elif any(farewell in prompt.lower() for farewell in farewells):
+        elif get_best_match(prompt, farewells):
             assistant_response = random.choice(farewell_responses)
         else:
             assistant_response = "I'm here to help! Ask me anything about the weather."
 
-    # Display the response in the chat
     with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()
         full_response = ""
@@ -218,5 +177,4 @@ if prompt := st.chat_input("Ask me about the weather!"):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-        st.session_state.messages.append(
-            {"role": "assistant", "content": full_response})
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
