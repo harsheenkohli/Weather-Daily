@@ -16,6 +16,34 @@ Deployed at: [Weather-Daily](https://weather-daily.streamlit.app/)
 - **Model Training**: Scikit-learn with TF-IDF vectorization and SVM classification
 - **Data Handling**: Pandas
 
+## Directory Structure
+```
+weather-daily/
+│
+├── .devcontainer/
+│   └── devcontainer.json
+├── .streamlit/
+│   ├── config.toml
+│   └── secrets.toml
+├── assets/
+│   ├── chatbot.png
+│   ├── human_chat.txt
+│   ├── logo.png
+│   ├── person.png
+│   ├── svm_model.joblib
+│   ├── weather_chat.txt
+│   └── world-cities.csv
+│
+├── __pycache__/
+│
+├── main.py
+├── ml_model.py
+├── small_talk.py
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
 ## How to Run Locally
 ### Prerequisites
 Ensure you have Python 3.8 or higher installed on your system. Install the required Python packages by running:
