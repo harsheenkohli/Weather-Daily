@@ -1,15 +1,15 @@
 # List of general phrases to respond to
 
 greetings = [
-    " hi", " hello", " hey", " greetings", " what's up",
-    " howdy", " salutations", " yo", " ahoy", " hi there",
-    " good morning", " good evening", " good afternoon"
+    " hi", " hello", " hey", " greetings", " what's up", " howdy", " salutations", 
+    " yo", " ahoy", " hi there", " good morning", " good evening", " good afternoon", 
+    " bonjour", " hola", " guten tag", " ola", " namaste"
 ]
 
 farewells = [
     " bye", " goodbye", " see you", " take care", " farewell", " no thanks", " nothing",
     " later", " catch you later", " have a nice day", " adios", " until next time", " see you later",
-    " back later", " sayonara"
+    " back later", " sayonara", "ciao", "adieu", "salut"
 ]
 
 thanks_phrases = [
