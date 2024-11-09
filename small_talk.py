@@ -9,7 +9,7 @@ greetings = [
 farewells = [
     " bye", " goodbye", " see you", " take care", " farewell", " no thanks", " nothing",
     " later", " catch you later", " have a nice day", " adios", " until next time", " see you later",
-    " back later"
+    " back later", " sayonara"
 ]
 
 thanks_phrases = [
