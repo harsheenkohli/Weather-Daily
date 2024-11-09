@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-api_key = os.getenv('API_KEY')
+api_key = "c7108bb07dc44bf08a1104810240911"
 
 st.set_page_config(
     page_title="Weather Daily",
