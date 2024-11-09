@@ -32,7 +32,7 @@ st.set_page_config(
     page_icon="./assets/logo.png"
 )
 
-st.title("Weather Daily")
+st.title("Weather-Daily")
 st.caption("Find the current weather, forecast the future or find the AQI in your region seamlessly.")
 
 # Theme configuration setup
