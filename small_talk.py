@@ -1,8 +1,8 @@
 # List of general phrases to respond to
 
 greetings = [
-    " hi", " hello", " hey", " greetings", " what's up", " howdy", " salutations", 
-    " yo", " ahoy", " hi there", " good morning", " good evening", " good afternoon", 
+    " hi", " hello", " hey", " greetings", " what's up", " howdy", " salutations",
+    " yo", " ahoy", " hi there", " good morning", " good evening", " good afternoon",
     " bonjour", " hola", " guten tag", " ola", " namaste"
 ]
 
@@ -45,7 +45,7 @@ general_query_responses = [
     "I'm here and ready! How can I assist you with the weather today?",
     "Doing well! What would you like to know about the weather?",
     "I'm all set to help! What do you need to know?",
-    "Just here to assist with your weather questions! What’s up?",
+    "Just here to assist with your weather questions! What's up?",
     "Always ready to help with the weather! What's your query?"
 ]
 
