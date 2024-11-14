@@ -13,12 +13,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
-
+import secrets
 import streamlit as st
 import requests
 import time
 import re
-import random
 from small_talk import *
 from PIL import Image
 import pandas as pd
@@ -83,7 +82,7 @@ def contains_city(query):
     words = set(re.findall(r'\w+', query.lower()))
     return bool(words & city_names)
 
-welcome_message = random.choice(welcome_messages)
+welcome_message = secrets.choice(welcome_messages)
 
 model = joblib.load('./assets/svm_model.joblib') 
 
@@ -175,13 +174,13 @@ if prompt := st.chat_input("Ask me about the weather!"):
     else:
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):
-            assistant_response = random.choice(greeting_responses)
+            assistant_response = secrets.choice(greeting_responses)
         elif get_best_match(prompt, general_queries):
-            assistant_response = random.choice(general_query_responses)
+            assistant_response = secrets.choice(general_query_responses)
         elif get_best_match(prompt, thanks_phrases):
-            assistant_response = random.choice(thanks_responses)
+            assistant_response = secrets.choice(thanks_responses)
         elif get_best_match(prompt, farewells):
-            assistant_response = random.choice(farewell_responses)
+            assistant_response = secrets.choice(farewell_responses)
         else:
             assistant_response = "I'm here to help! Ask me anything about the weather."
 
