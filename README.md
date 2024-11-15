@@ -12,7 +12,7 @@ Deployed at: [Weather-Daily](https://weather-daily.streamlit.app/)
 ## Technology Stack
 - **Frontend Framework**: Streamlit
 - **Machine Learning Model**: Support Vector Machine (SVM)
-- **Text Processing**: NLTK for tokenization and lemmatization
+- **Text Processing**: `fuzzywuzzy` module used for fuzzy matching of queries making the chatbot user-friendly.
 - **Model Training**: Scikit-learn with TF-IDF vectorization and SVM classification
 - **Data Handling**: Pandas
 
