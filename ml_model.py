@@ -41,7 +41,7 @@ def load_data():
 def train_model():
     texts, labels = load_data()
     X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=0.3, random_state=42)
+        texts, labels, test_size=0.25, random_state=42)
 
     # Create a pipeline with TF-IDF and SVM
     model = make_pipeline(TfidfVectorizer(), SVC(
