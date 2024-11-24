@@ -57,11 +57,13 @@ pip install -r requirements.txt
     git clone https://github.com/harsheenkohli/weather-daily.git
     cd weather-daily
     ```
-2. **API Key:** Create a `.streamlit/secrets.toml` file and add your API key for weather data:
+2. **API Key:** Create a `.streamlit/secrets.toml` file and add your API key(s) for weather data:
     ```toml
     [API_KEY]
-    YOUR_API_KEY = "your_weather_api_key"
+    API_KEY = "your_weather_api_key"
+    AQI_KEY = "your_aqi_key"
     ```
+    (this format has been written in accordance with the format used in this repository)
 3. **Train the model (Optional)**: If you need to retrain the model, run:
     ```bash
     python ml_model.py
