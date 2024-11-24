@@ -63,7 +63,7 @@ pip install -r requirements.txt
     API_KEY = "your_weather_api_key"
     AQI_KEY = "your_aqi_key"
     ```
-    (this format has been written in accordance with the format used in this repository)
+    > (this format has been written in accordance with the format used in this repository)
 3. **Train the model (Optional)**: If you need to retrain the model, run:
     ```bash
     python ml_model.py
