@@ -25,6 +25,7 @@ import joblib
 from fuzzywuzzy import fuzz, process
 
 api_key = st.secrets['API_KEY']
+aqi_key = st.secrets['AQI_KEY']
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -108,6 +109,37 @@ def parse_query(user_query):
     location = location.group(1).strip() if location else "unknown location"
     return location, category, days_requested
 
+def calc_aqi(location):
+    url = f'https://api.waqi.info/feed/{location}/?token={aqi_key}'
+    try:
+        response = requests.get(url)
+        data = response.json()
+        if data['status'] != 'ok':
+            # error_message = data.get('error', {}).get('message', 'Unknown error occurred')
+            return "Unknown", "Unknown"
+        
+        aqi_index = data["data"]["aqi"]
+        status = ""
+        if aqi_index <= 50:
+            status = "Good"
+        elif aqi_index <= 100:
+            status = "Satisfactory"
+        elif aqi_index <= 200:
+            status = "Moderate"
+        elif aqi_index <= 300:
+            status = "Poor"
+        elif aqi_index <= 400:
+            status = "Very Poor"
+        elif aqi_index <= 500:
+            status = "Severe"
+        else:
+            status = "Hazardous"
+        return aqi_index, status
+    except requests.exceptions.RequestException as e:
+        return f"Unable to fetch AQI data due to a network error: {str(e)}"
+    except KeyError as e:
+        return f"Unable to find AQI data for this location."
+
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
@@ -142,7 +174,8 @@ def get_weather_data(location, category, days_requested):
             return forecast_summary.strip()
         elif category == "aqi":
             aq = data['current']['air_quality']
-            return f"AQI for {location_info}:\n- PM 2.5: {aq['pm2_5']}\n- PM 10: {aq['pm10']}\n- CO: {aq['co']}\n- NO₂: {aq['no2']}\n- O₃: {aq['o3']}\n- SO₂: {aq['so2']}"
+            aqi_index, status = calc_aqi(data['location']['name'])
+            return f"AQI for {location_info}:\n- AQI Index: {aqi_index}\n- Status: {status}\n- PM 2.5: {aq['pm2_5']}\n- PM 10: {aq['pm10']}\n- CO: {aq['co']}\n- NO₂: {aq['no2']}\n- O₃: {aq['o3']}\n- SO₂: {aq['so2']}"
     except requests.exceptions.RequestException as e:
         return f"Unable to fetch weather data due to a network error: {str(e)}"
     except KeyError as e:
