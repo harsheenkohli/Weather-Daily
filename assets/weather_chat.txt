@@ -13,6 +13,8 @@ What does the future weather seem like?
 What’s the temperature like today?
 Is it raining in my area right now?
 Will tomorrow be sunny?
+What will the weather be like in Canberra tomorrow?
+Weather in Denmark tomorrow
 How is the air quality in my city at the moment?
 What does the weekend forecast look like?
 Did it snow in the mountains yesterday?
@@ -96,6 +98,7 @@ Is there any snow forecasted for the holidays?
 What is the weather trend for the next month?
 Is the forecast calling for sunshine on Monday?
 Are we expecting a dust storm this week?
+Weather forecast tomorrow in Meerut
 How long will the current high-pressure system stay?
 Will it be mostly sunny or partly cloudy today?
 Is there a chance of freezing rain tomorrow night?
