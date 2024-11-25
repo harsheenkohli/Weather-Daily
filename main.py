@@ -33,7 +33,8 @@ st.set_page_config(
 )
 
 st.title("Weather-Daily")
-st.caption("Find the current weather, forecast the future or find the AQI in your region seamlessly.")
+st.caption(
+    "Find the current weather, forecast the future or find the AQI in your region seamlessly.")
 
 # Theme configuration setup
 ms = st.session_state
@@ -59,6 +60,7 @@ if "themes" not in ms:
         },
     }
 
+
 def ChangeTheme():
     previous_theme = ms.themes["current_theme"]
     tdict = ms.themes["light"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]
@@ -68,6 +70,7 @@ def ChangeTheme():
 
     ms.themes["refreshed"] = False
     ms.themes["current_theme"] = "dark" if previous_theme == "light" else "light"
+
 
 btn_face = ms.themes["light"]["button_face"] if ms.themes["current_theme"] == "light" else ms.themes["dark"]["button_face"]
 st.button(btn_face, on_click=ChangeTheme)
@@ -79,35 +82,55 @@ if ms.themes["refreshed"] == False:
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
 
+
 def contains_city(query):
     words = set(re.findall(r'\w+', query.lower()))
     return bool(words & city_names)
 
+
 welcome_message = secrets.choice(welcome_messages)
 
-model = joblib.load('./assets/svm_model.joblib') 
+model = joblib.load('./assets/svm_model.joblib')
+
 
 def classify_text(user_input):
     prediction = model.predict([user_input])[0]
     return prediction
 
+
 def parse_query(user_query):
     location, category, days_requested = None, "current", 1
     user_query = user_query.lower()
-    if "weather in" not in user_query:
+
+    # Add 'weather in' for better parsing if not present
+    if "weather in" not in user_query and not user_query.startswith("aqi"):
         user_query = "weather in " + user_query
+
+    # Handle AQI requests
     if "aqi" in user_query:
-        category, location = "aqi", re.search(r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
+        category = "aqi"
+        location_match = re.search(
+            r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
+        location = location_match.group(1).strip() if location_match else None
+
+    # Handle specific or multiple days forecast
     elif "tomorrow" in user_query:
-        category, days_requested = "specific", 1
+        category, days_requested = "specific", 2
     elif days_match := re.search(r"(after|for|in) (\d+) days?", user_query):
-        category, days_requested = "specific" if days_match[1] == "after" else "multiple", int(days_match[2])
+        days_requested = int(days_match[2]) + 1
+        category = "specific" if days_match[1] == "after" else "multiple"
     elif "this week" in user_query:
         category, days_requested = "multiple", 7
+
+    # Extract location
     if not location:
-        location = re.search(r"weather in (.+)", user_query)
-    location = location.group(1).strip() if location else "unknown location"
+        location_match = re.search(r"weather in (.+)", user_query)
+        location = location_match.group(1).strip() if location_match else None
+
+    location = location if location and location.lower(
+    ) != "unknown location" else "unknown location"
     return location, category, days_requested
+
 
 def calc_aqi(location):
     url = f'https://api.waqi.info/feed/{location}/?token={aqi_key}'
@@ -117,7 +140,7 @@ def calc_aqi(location):
         if data['status'] != 'ok':
             # error_message = data.get('error', {}).get('message', 'Unknown error occurred')
             return "Unknown", "Unknown"
-        
+
         aqi_index = data["data"]["aqi"]
         status = ""
         if aqi_index <= 50:
@@ -140,13 +163,15 @@ def calc_aqi(location):
     except KeyError as e:
         return f"Unable to find AQI data for this location."
 
+
 def get_weather_data(location, category, days_requested):
     if location.lower() == "delhi":
         location = "New Delhi"
+
     days_to_fetch = min(days_requested, 10)
     api_url = (
         f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi={'yes' if category == 'aqi' else 'no'}"
-        if category == "current" or category == "aqi"
+        if category in ["current", "aqi"]
         else f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
     )
 
@@ -154,7 +179,8 @@ def get_weather_data(location, category, days_requested):
         response = requests.get(api_url)
         data = response.json()
         if response.status_code != 200 or 'error' in data:
-            error_message = data.get('error', {}).get('message', 'Unknown error occurred')
+            error_message = data.get('error', {}).get(
+                'message', 'Unknown error occurred')
             return f"Error fetching weather data: {error_message}"
         if 'location' not in data:
             return "Error: Unable to retrieve location information."
@@ -165,7 +191,8 @@ def get_weather_data(location, category, days_requested):
             curr = data['current']
             return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n- {curr['condition']['text']}\n- Temp: {curr['temp_c']}°C\n- Feels like: {curr['feelslike_c']}°C\n- Humidity: {curr['humidity']}%\n- Wind: {curr['wind_kph']} kph\n- Precipitation: {curr['precip_mm']} mm"
         elif category == "specific":
-            forecast = data['forecast']['forecastday'][-1]
+            forecast = data['forecast']['forecastday'][min(
+                days_requested - 1, len(data['forecast']['forecastday']) - 1)]
             return f"Forecast for {location_info} on {forecast['date']}:\n- {forecast['day']['condition']['text']}\n- Max Temp: {forecast['day']['maxtemp_c']}°C\n- Min Temp: {forecast['day']['mintemp_c']}°C\n- Chance of Rain: {forecast['day'].get('daily_chance_of_rain', 0)}%"
         elif category == "multiple":
             forecast_summary = f"Multi-day forecast for {location_info}:\n\n"
@@ -181,18 +208,24 @@ def get_weather_data(location, category, days_requested):
     except KeyError as e:
         return f"Unable to find weather data for this location."
 
-person, chatbot = Image.open('assets/person.png'), Image.open('assets/chatbot.png')
+
+person, chatbot = Image.open(
+    'assets/person.png'), Image.open('assets/chatbot.png')
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": welcome_message}]
+    st.session_state.messages = [
+        {"role": "assistant", "content": welcome_message}]
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=person if message["role"] == "user" else chatbot):
         st.markdown(message["content"])
 
+
 def get_best_match(prompt, category_list, threshold=75):
-    match, score = process.extractOne(prompt.lower(), category_list, scorer=fuzz.ratio)
+    match, score = process.extractOne(
+        prompt.lower(), category_list, scorer=fuzz.ratio)
     return match if score >= threshold else None
+
 
 if prompt := st.chat_input("Ask me about the weather!"):
     with st.chat_message("user", avatar=person):
@@ -203,7 +236,8 @@ if prompt := st.chat_input("Ask me about the weather!"):
 
     if user_query_type == "weather":
         location, category, days_requested = parse_query(prompt)
-        assistant_response = get_weather_data(location, category, days_requested) if location != "unknown location" else "Please specify a location."
+        assistant_response = get_weather_data(
+            location, category, days_requested) if location != "unknown location" else "Please specify a location."
     else:
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):
@@ -225,4 +259,5 @@ if prompt := st.chat_input("Ask me about the weather!"):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.session_state.messages.append(
+            {"role": "assistant", "content": full_response})
