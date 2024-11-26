@@ -189,20 +189,20 @@ def get_weather_data(location, category, days_requested):
 
         if category == "current":
             curr = data['current']
-            return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n - {curr['condition']['text']}\n - Temp: {curr['temp_c']}°C\n - Feels like: {curr['feelslike_c']}°C\n - Humidity: {curr['humidity']}%\n - Wind: {curr['wind_kph']} kph\n - Precipitation: {curr['precip_mm']} mm"
+            return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n--• {curr['condition']['text']}\n\n--• Temp: {curr['temp_c']}°C\n--• Feels like: {curr['feelslike_c']}°C\n--• Humidity: {curr['humidity']}%\n--• Wind: {curr['wind_kph']} kph\n--• Precipitation: {curr['precip_mm']} mm"
         elif category == "specific":
             forecast = data['forecast']['forecastday'][min(
                 days_requested - 1, len(data['forecast']['forecastday']) - 1)]
-            return f"Forecast for {location_info} on {forecast['date']}:\n- {forecast['day']['condition']['text']}\n- Max Temp: {forecast['day']['maxtemp_c']}°C\n- Min Temp: {forecast['day']['mintemp_c']}°C\n- Chance of Rain: {forecast['day'].get('daily_chance_of_rain', 0)}%"
+            return f"Forecast for {location_info} on {forecast['date']}:\n--• {forecast['day']['condition']['text']}\n--• Max Temp: {forecast['day']['maxtemp_c']}°C\n--• Min Temp: {forecast['day']['mintemp_c']}°C\n--• Chance of Rain: {forecast['day'].get('daily_chance_of_rain', 0)}%"
         elif category == "multiple":
-            forecast_summary = f"Multi-day forecast for {location_info}:\n"
+            forecast_summary = f"Multi-day forecast for {location_info}:"
             for day in data['forecast']['forecastday']:
-                forecast_summary += f"\nDate: {day['date']} - {day['day']['condition']['text']} - Max: {day['day']['maxtemp_c']}°C, Min: {day['day']['mintemp_c']}°C, Rain: {day['day'].get('daily_chance_of_rain', 0)}%\n"
+                forecast_summary += f"\n--• Date: {day['date']} - {day['day']['condition']['text']} - Max: {day['day']['maxtemp_c']}°C - Min: {day['day']['mintemp_c']}°C - Rain: {day['day'].get('daily_chance_of_rain', 0)}%\n"
             return forecast_summary.strip()
         elif category == "aqi":
             aq = data['current']['air_quality']
             aqi_index, status = calc_aqi(data['location']['name'])
-            return f"AQI for {location_info}:\n- AQI Index: {aqi_index}\n- Status: {status}\n- PM 2.5: {aq['pm2_5']}\n- PM 10: {aq['pm10']}\n- CO: {aq['co']}\n- NO₂: {aq['no2']}\n- O₃: {aq['o3']}\n- SO₂: {aq['so2']}"
+            return f"AQI for {location_info}:\n--• AQI Index: {aqi_index}\n--• Status: {status}\n--• PM 2.5: {aq['pm2_5']}\n--• PM 10: {aq['pm10']}\n--• CO: {aq['co']}\n--• NO₂: {aq['no2']}\n--• O₃: {aq['o3']}\n--• SO₂: {aq['so2']}"
     except requests.exceptions.RequestException as e:
         return f"Unable to fetch weather data due to a network error: {str(e)}"
     except KeyError as e:
@@ -254,9 +254,9 @@ if prompt := st.chat_input("Ask me about the weather!"):
     with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()
         full_response = ""
-        for chunk in assistant_response.split("\n"):
-            full_response += chunk + "\n  "
-            time.sleep(0.05)
+        for chunk in assistant_response.split("--"):
+            full_response += chunk + "\n "
+            time.sleep(0.1)
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
         st.session_state.messages.append(
