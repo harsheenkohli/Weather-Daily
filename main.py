@@ -3,7 +3,6 @@ import streamlit as st
 import time
 from small_talk import *
 from PIL import Image
-import pandas as pd
 import joblib
 from fuzzywuzzy import fuzz, process
 from query_parser import parse_query
