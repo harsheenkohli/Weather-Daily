@@ -241,7 +241,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
     else:
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):
-            assistant_response = secrets.choice(greeting_responses)
+            assistant_response = secrets.choice(greeting_responses) 
         elif get_best_match(prompt, general_queries):
             assistant_response = secrets.choice(general_query_responses)
         elif get_best_match(prompt, thanks_phrases):
@@ -255,9 +255,11 @@ if prompt := st.chat_input("Ask me about the weather!"):
         message_placeholder = st.empty()
         full_response = ""
         for chunk in assistant_response.split("--"):
-            full_response += chunk + "\n "
-            time.sleep(0.1)
-            message_placeholder.markdown(full_response + "▌")
+            for char in chunk:  # Iterate through each character in the chunk
+                full_response += char
+                message_placeholder.markdown(full_response + "▌")
+                time.sleep(0.01)  # Adjust delay for typewriter effect
+            full_response += "\n "  # Add a newline after each chunk
         message_placeholder.markdown(full_response)
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response})
