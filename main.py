@@ -1,18 +1,3 @@
-"""
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-
 import secrets
 import streamlit as st
 import time
@@ -75,9 +60,7 @@ st.button(btn_face, on_click=ChangeTheme)
 if ms.themes["refreshed"] == False:
     ms.themes["refreshed"] = True
     st.rerun()
-
-cities_df = pd.read_csv('./assets/world-cities.csv')
-city_names = set(cities_df["name"].str.lower())
+    
 
 welcome_message = secrets.choice(welcome_messages)
 model = joblib.load('./assets/svm_model.joblib')

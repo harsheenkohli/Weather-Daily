@@ -1,23 +1,30 @@
 import re
 import streamlit as st
+from nltk.corpus import stopwords
+import pandas as pd
+from fuzzywuzzy import fuzz, process
+
+stop_words = set(stopwords.words('english'))
 
 api_key = st.secrets['API_KEY']
+
+cities_df = pd.read_csv('./assets/world-cities.csv')
+city_names = set(cities_df["name"].str.lower())
+
+
+def remove_stopwords_nltk(query):
+    filtered_query = " ".join(
+        word for word in query.split() if word.lower() not in stop_words)
+    return filtered_query
 
 
 def parse_query(user_query):
     location, category, days_requested = None, "current", 1
     user_query = user_query.lower()
 
-    # Add 'weather in' for better parsing if not present
-    if "weather in" not in user_query and not user_query.startswith("aqi"):
-        user_query = "weather in " + user_query
-
     # Handle AQI requests
     if "aqi" in user_query:
         category = "aqi"
-        location_match = re.search(
-            r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
-        location = location_match.group(1).strip() if location_match else None
 
     # Handle specific or multiple days forecast
     elif "tomorrow" in user_query:
@@ -28,11 +35,25 @@ def parse_query(user_query):
     elif "this week" in user_query:
         category, days_requested = "multiple", 7
 
-    # Extract location
-    if not location:
-        location_match = re.search(r"weather in (.+)", user_query)
-        location = location_match.group(1).strip() if location_match else None
+    # Remove stopwords from the query
+    query = remove_stopwords_nltk(user_query)
 
-    location = location if location and location.lower(
-    ) != "unknown location" else "unknown location"
+    # Extract location using fuzzy matching
+    location = find_location_in_query(query, city_names) or "unknown location"
     return location, category, days_requested
+
+
+def find_location_in_query(query, city_names, threshold=90):
+    query_words = query.split()
+    # Direct match for efficiency
+    for word in query_words:
+        if word.lower() in city_names:
+            return word.title()
+
+    # Fuzzy match for more flexible search
+    match, score = process.extractOne(
+        query.lower(), city_names, scorer=fuzz.partial_ratio)
+    if score >= threshold:
+        return match.title()
+
+    return None
