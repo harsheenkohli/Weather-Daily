@@ -4,3 +4,4 @@ joblib
 streamlit
 fuzzywuzzy
 python-Levenshtein
+nltk
