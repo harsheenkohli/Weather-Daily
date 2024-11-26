@@ -58,7 +58,9 @@ def get_weather_data(location, category, days_requested):
             return f"Error fetching weather data. My apolie"
         if 'location' not in data:
             return "Error: Unable to retrieve location information."
-
+        
+        if data['location']['name'].title() == "Athens Eleftherios Venizelos International Airport":
+            raise KeyError
         location_info = f"{data['location']['name'].title()}, {data['location']['region']}, {data['location']['country']}"
 
         if category == "current":
@@ -79,7 +81,7 @@ def get_weather_data(location, category, days_requested):
             return f"AQI for {location_info}:\n--• AQI Index: {aqi_index}\n--• Status: {status}\n--• PM 2.5: {aq['pm2_5']}\n--• PM 10: {aq['pm10']}\n--• CO: {aq['co']}\n--• NO₂: {aq['no2']}\n--• O₃: {aq['o3']}\n--• SO₂: {aq['so2']}"
     except requests.exceptions.RequestException as e:
         secrets.choice(request_exception_responses)
-        return secrets.choice(request_exception_responses) + " 😐"
+        return secrets.choice(request_exception_responses) + " 😔"
     except KeyError as e:
         secrets.choice(key_error_responses)
-        return secrets.choice(key_error_responses) + ""
+        return secrets.choice(key_error_responses) + " 😐"
