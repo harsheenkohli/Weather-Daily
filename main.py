@@ -15,17 +15,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import secrets
 import streamlit as st
-import requests
 import time
-import re
 from small_talk import *
 from PIL import Image
 import pandas as pd
 import joblib
 from fuzzywuzzy import fuzz, process
-
-api_key = st.secrets['API_KEY']
-aqi_key = st.secrets['AQI_KEY']
+from query_parser import parse_query
+from weather_forecaster import get_weather_data
 
 st.set_page_config(
     page_title="Weather Daily",
@@ -82,131 +79,13 @@ if ms.themes["refreshed"] == False:
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
 
-
-def contains_city(query):
-    words = set(re.findall(r'\w+', query.lower()))
-    return bool(words & city_names)
-
-
 welcome_message = secrets.choice(welcome_messages)
-
 model = joblib.load('./assets/svm_model.joblib')
 
 
 def classify_text(user_input):
     prediction = model.predict([user_input])[0]
     return prediction
-
-
-def parse_query(user_query):
-    location, category, days_requested = None, "current", 1
-    user_query = user_query.lower()
-
-    # Add 'weather in' for better parsing if not present
-    if "weather in" not in user_query and not user_query.startswith("aqi"):
-        user_query = "weather in " + user_query
-
-    # Handle AQI requests
-    if "aqi" in user_query:
-        category = "aqi"
-        location_match = re.search(
-            r"aqi in (.+)", user_query) or re.search(r"(.+) aqi", user_query)
-        location = location_match.group(1).strip() if location_match else None
-
-    # Handle specific or multiple days forecast
-    elif "tomorrow" in user_query:
-        category, days_requested = "specific", 2
-    elif days_match := re.search(r"(after|for|in) (\d+) days?", user_query):
-        days_requested = int(days_match[2]) + 1
-        category = "specific" if days_match[1] == "after" else "multiple"
-    elif "this week" in user_query:
-        category, days_requested = "multiple", 7
-
-    # Extract location
-    if not location:
-        location_match = re.search(r"weather in (.+)", user_query)
-        location = location_match.group(1).strip() if location_match else None
-
-    location = location if location and location.lower(
-    ) != "unknown location" else "unknown location"
-    return location, category, days_requested
-
-
-def calc_aqi(location):
-    url = f'https://api.waqi.info/feed/{location}/?token={aqi_key}'
-    try:
-        response = requests.get(url)
-        data = response.json()
-        if data['status'] != 'ok':
-            # error_message = data.get('error', {}).get('message', 'Unknown error occurred')
-            return "Unknown", "Unknown"
-
-        aqi_index = data["data"]["aqi"]
-        status = ""
-        if aqi_index <= 50:
-            status = "Good"
-        elif aqi_index <= 100:
-            status = "Satisfactory"
-        elif aqi_index <= 200:
-            status = "Moderate"
-        elif aqi_index <= 300:
-            status = "Poor"
-        elif aqi_index <= 400:
-            status = "Very Poor"
-        elif aqi_index <= 500:
-            status = "Severe"
-        else:
-            status = "Hazardous"
-        return aqi_index, status
-    except requests.exceptions.RequestException as e:
-        return f"Unable to fetch AQI data due to a network error: {str(e)}"
-    except KeyError as e:
-        return f"Unable to find AQI data for this location."
-
-
-def get_weather_data(location, category, days_requested):
-    if location.lower() == "delhi":
-        location = "New Delhi"
-
-    days_to_fetch = min(days_requested, 10)
-    api_url = (
-        f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi={'yes' if category == 'aqi' else 'no'}"
-        if category in ["current", "aqi"]
-        else f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days={days_to_fetch}&aqi=no&alerts=no"
-    )
-
-    try:
-        response = requests.get(api_url)
-        data = response.json()
-        if response.status_code != 200 or 'error' in data:
-            error_message = data.get('error', {}).get(
-                'message', 'Unknown error occurred')
-            return f"Error fetching weather data: {error_message}"
-        if 'location' not in data:
-            return "Error: Unable to retrieve location information."
-
-        location_info = f"{data['location']['name'].title()}, {data['location']['region']}, {data['location']['country']}"
-
-        if category == "current":
-            curr = data['current']
-            return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n--• {curr['condition']['text']}\n\n--• Temp: {curr['temp_c']}°C\n--• Feels like: {curr['feelslike_c']}°C\n--• Humidity: {curr['humidity']}%\n--• Wind: {curr['wind_kph']} kph\n--• Precipitation: {curr['precip_mm']} mm"
-        elif category == "specific":
-            forecast = data['forecast']['forecastday'][min(
-                days_requested - 1, len(data['forecast']['forecastday']) - 1)]
-            return f"Forecast for {location_info} on {forecast['date']}:\n--• {forecast['day']['condition']['text']}\n--• Max Temp: {forecast['day']['maxtemp_c']}°C\n--• Min Temp: {forecast['day']['mintemp_c']}°C\n--• Chance of Rain: {forecast['day'].get('daily_chance_of_rain', 0)}%"
-        elif category == "multiple":
-            forecast_summary = f"Multi-day forecast for {location_info}:"
-            for day in data['forecast']['forecastday']:
-                forecast_summary += f"\n--• Date: {day['date']} - {day['day']['condition']['text']} - Max: {day['day']['maxtemp_c']}°C - Min: {day['day']['mintemp_c']}°C - Rain: {day['day'].get('daily_chance_of_rain', 0)}%\n"
-            return forecast_summary.strip()
-        elif category == "aqi":
-            aq = data['current']['air_quality']
-            aqi_index, status = calc_aqi(data['location']['name'])
-            return f"AQI for {location_info}:\n--• AQI Index: {aqi_index}\n--• Status: {status}\n--• PM 2.5: {aq['pm2_5']}\n--• PM 10: {aq['pm10']}\n--• CO: {aq['co']}\n--• NO₂: {aq['no2']}\n--• O₃: {aq['o3']}\n--• SO₂: {aq['so2']}"
-    except requests.exceptions.RequestException as e:
-        return f"Unable to fetch weather data due to a network error: {str(e)}"
-    except KeyError as e:
-        return f"Unable to find weather data for this location."
 
 
 person, chatbot = Image.open(

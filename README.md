@@ -38,9 +38,11 @@ weather-daily/
 │
 ├── main.py
 ├── ml_model.py
+├── query_parser.py
 ├── small_talk.py
 ├── requirements.txt
 ├── README.md
+├── weather_forecaster.py
 └── .gitignore
 ```
 
