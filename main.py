@@ -242,11 +242,15 @@ if prompt := st.chat_input("Ask me about the weather!"):
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):
             assistant_response = secrets.choice(greeting_responses) 
+            assistant_response = secrets.choice(greeting_responses) 
         elif get_best_match(prompt, general_queries):
+            assistant_response = secrets.choice(general_query_responses)
             assistant_response = secrets.choice(general_query_responses)
         elif get_best_match(prompt, thanks_phrases):
             assistant_response = secrets.choice(thanks_responses)
+            assistant_response = secrets.choice(thanks_responses)
         elif get_best_match(prompt, farewells):
+            assistant_response = secrets.choice(farewell_responses)
             assistant_response = secrets.choice(farewell_responses)
         else:
             assistant_response = "I'm here to help! Ask me anything about the weather."
