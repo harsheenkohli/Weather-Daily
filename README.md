@@ -89,7 +89,9 @@ The `ml_model.py` script:
 ## File Descriptions
 - **`main.py`**: The main script for the Streamlit application.
 - **`ml_model.py`**: Script for training the machine learning model.
+- **`query_parser.py`**: Script for finding the weather query type and location in the user input.
 - **`small_talk.py`**: Contains predefined responses for small talk interactions.
+- **`weather_forecaster.py`**: Script for fetching output with API calls based on parsed query.
 - **`assets/`**: Directory containing text data, images, the trained model, and additional resources.
 
 ## Deployment
