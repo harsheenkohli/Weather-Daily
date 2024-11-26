@@ -189,7 +189,7 @@ def get_weather_data(location, category, days_requested):
 
         if category == "current":
             curr = data['current']
-            return f"Current weather in {location_info} (as of {data['location']['localtime']}):  \n- {curr['condition']['text']}\n- Temp: {curr['temp_c']}°C\n- Feels like: {curr['feelslike_c']}°C\n- Humidity: {curr['humidity']}%\n- Wind: {curr['wind_kph']} kph\n- Precipitation: {curr['precip_mm']} mm"
+            return f"Current weather in {location_info} (as of {data['location']['localtime']}):\n - {curr['condition']['text']}\n - Temp: {curr['temp_c']}°C\n - Feels like: {curr['feelslike_c']}°C\n - Humidity: {curr['humidity']}%\n - Wind: {curr['wind_kph']} kph\n - Precipitation: {curr['precip_mm']} mm"
         elif category == "specific":
             forecast = data['forecast']['forecastday'][min(
                 days_requested - 1, len(data['forecast']['forecastday']) - 1)]
