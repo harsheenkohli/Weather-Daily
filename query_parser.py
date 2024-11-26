@@ -1,8 +1,11 @@
 import re
 import streamlit as st
+import nltk
 from nltk.corpus import stopwords
 import pandas as pd
 from fuzzywuzzy import fuzz, process
+
+nltk.download('stopwords')
 
 stop_words = set(stopwords.words('english'))
 
