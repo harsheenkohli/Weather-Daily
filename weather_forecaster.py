@@ -1,5 +1,7 @@
 import requests
 import streamlit as st
+import secrets
+from error_texts import *
 
 api_key = st.secrets['API_KEY']
 aqi_key = st.secrets['AQI_KEY']
@@ -31,9 +33,11 @@ def calc_aqi(location):
             status = "Hazardous"
         return aqi_index, status
     except requests.exceptions.RequestException as e:
-        return f"Unable to fetch AQI data due to a network error: {str(e)}"
+        secrets.choice(request_exception_responses)
+        return secrets.choice(request_exception_responses) + " 😔"
     except KeyError as e:
-        return f"Unable to find AQI data for this location."
+        secrets.choice(key_error_responses)
+        return secrets.choice(key_error_responses) + " 😐"
 
 
 def get_weather_data(location, category, days_requested):
@@ -53,7 +57,7 @@ def get_weather_data(location, category, days_requested):
         if response.status_code != 200 or 'error' in data:
             error_message = data.get('error', {}).get(
                 'message', 'Unknown error occurred')
-            return f"Error fetching weather data: {error_message}"
+            return f"Error fetching weather data. My apolie"
         if 'location' not in data:
             return "Error: Unable to retrieve location information."
 
@@ -76,6 +80,8 @@ def get_weather_data(location, category, days_requested):
             aqi_index, status = calc_aqi(data['location']['name'])
             return f"AQI for {location_info}:\n--• AQI Index: {aqi_index}\n--• Status: {status}\n--• PM 2.5: {aq['pm2_5']}\n--• PM 10: {aq['pm10']}\n--• CO: {aq['co']}\n--• NO₂: {aq['no2']}\n--• O₃: {aq['o3']}\n--• SO₂: {aq['so2']}"
     except requests.exceptions.RequestException as e:
-        return f"Unable to fetch weather data due to a network error: {str(e)}"
+        secrets.choice(request_exception_responses)
+        return secrets.choice(request_exception_responses) + " 😐"
     except KeyError as e:
-        return f"Unable to find weather data for this location."
+        secrets.choice(key_error_responses)
+        return secrets.choice(key_error_responses) + ""

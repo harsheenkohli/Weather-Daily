@@ -42,11 +42,11 @@ def parse_query(user_query):
     query = remove_stopwords_nltk(user_query)
 
     # Extract location using fuzzy matching
-    location = find_location_in_query(query, city_names) or "unknown location"
+    location = find_location_in_query(query, city_names)
     return location, category, days_requested
 
 
-def find_location_in_query(query, city_names, threshold=90):
+def find_location_in_query(query, city_names, threshold=85):
     query_words = query.split()
     # Direct match for efficiency
     for word in query_words:

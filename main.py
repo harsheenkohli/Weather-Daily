@@ -2,6 +2,7 @@ import secrets
 import streamlit as st
 import time
 from small_talk import *
+from error_texts import *
 from PIL import Image
 import joblib
 from fuzzywuzzy import fuzz, process
@@ -98,7 +99,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
     if user_query_type == "weather":
         location, category, days_requested = parse_query(prompt)
         assistant_response = get_weather_data(
-            location, category, days_requested) if location != "unknown location" else "Please specify a location."
+            location, category, days_requested) if location != None else secrets.choice(key_error_responses) + " 😐"
     else:
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):

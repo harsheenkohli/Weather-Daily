@@ -36,6 +36,7 @@ weather-daily/
 │
 ├── __pycache__/
 │
+├── error_texts.py
 ├── main.py
 ├── ml_model.py
 ├── query_parser.py
@@ -87,6 +88,7 @@ The `ml_model.py` script:
 - Saves the trained model as `assets/svm_model.joblib`.
 
 ## File Descriptions
+- **`error.py`**: Contains predefined responses if errors are encountered.
 - **`main.py`**: The main script for the Streamlit application.
 - **`ml_model.py`**: Script for training the machine learning model.
 - **`query_parser.py`**: Script for finding the weather query type and location in the user input.
