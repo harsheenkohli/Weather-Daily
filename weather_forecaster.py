@@ -55,7 +55,7 @@ def get_weather_data(location, category, days_requested):
         response = requests.get(api_url)
         data = response.json()
         if response.status_code != 200 or 'error' in data:
-            return f"Error fetching weather data. My apolie"
+            return f"Error fetching weather data. My apologies! 😔"
         if 'location' not in data:
             return "Error: Unable to retrieve location information."
         
