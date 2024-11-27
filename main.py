@@ -60,7 +60,7 @@ st.button(btn_face, on_click=ChangeTheme)
 if ms.themes["refreshed"] == False:
     ms.themes["refreshed"] = True
     st.rerun()
-    
+
 
 welcome_message = secrets.choice(welcome_messages)
 model = joblib.load('./assets/svm_model.joblib')
@@ -103,8 +103,8 @@ if prompt := st.chat_input("Ask me about the weather!"):
     else:
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):
-            assistant_response = secrets.choice(greeting_responses) 
-            assistant_response = secrets.choice(greeting_responses) 
+            assistant_response = secrets.choice(greeting_responses)
+            assistant_response = secrets.choice(greeting_responses)
         elif get_best_match(prompt, general_queries):
             assistant_response = secrets.choice(general_query_responses)
             assistant_response = secrets.choice(general_query_responses)
@@ -115,7 +115,9 @@ if prompt := st.chat_input("Ask me about the weather!"):
             assistant_response = secrets.choice(farewell_responses)
             assistant_response = secrets.choice(farewell_responses)
         else:
-            assistant_response = "I'm here to help! Ask me anything about the weather."
+            location, category, days_requested = parse_query(prompt)
+            assistant_response = get_weather_data(
+                location, category, days_requested) if location != None else "I'm here to help! Ask me anything about the weather."
 
     with st.chat_message("assistant", avatar=chatbot):
         message_placeholder = st.empty()

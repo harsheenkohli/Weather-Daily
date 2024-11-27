@@ -1,3 +1,4 @@
+from fuzzywuzzy import process, fuzz
 import re
 import streamlit as st
 import nltk
@@ -47,15 +48,19 @@ def parse_query(user_query):
 
 def find_location_in_query(query, city_names, threshold=85):
     query_words = query.split()
+
     # Direct match for efficiency
     for word in query_words:
         if word.lower() in city_names:
             return word.title()
 
     # Fuzzy match for more flexible search
-    match, score = process.extractOne(
+    matches = process.extract(
         query.lower(), city_names, scorer=fuzz.partial_ratio)
-    if score >= threshold:
-        return match.title()
+    if matches:
+        # Get the highest score match
+        best_match, best_score = max(matches, key=lambda x: x[1])
+        if best_score >= threshold:
+            return best_match.title()
 
     return None
