@@ -99,7 +99,7 @@ if prompt := st.chat_input("Ask me about the weather!"):
     if user_query_type == "weather":
         location, category, days_requested = parse_query(prompt)
         assistant_response = get_weather_data(
-            location, category, days_requested) if location != None else secrets.choice(key_error_responses) + " 😐"
+            location, category, days_requested if category != "multiple" else days_requested - 1) if location != None else secrets.choice(key_error_responses) + " 😐"
     else:
         # Fuzzy matching for small talk
         if get_best_match(prompt, greetings):
