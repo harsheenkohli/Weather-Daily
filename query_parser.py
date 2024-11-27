@@ -8,6 +8,7 @@ from fuzzywuzzy import fuzz, process
 nltk.download('stopwords')
 
 stop_words = set(stopwords.words('english'))
+stop_words.update(['weather', 'climate', 'aqi', 'temperature'])
 
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
