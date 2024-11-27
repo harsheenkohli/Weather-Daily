@@ -9,8 +9,6 @@ nltk.download('stopwords')
 
 stop_words = set(stopwords.words('english'))
 
-api_key = st.secrets['API_KEY']
-
 cities_df = pd.read_csv('./assets/world-cities.csv')
 city_names = set(cities_df["name"].str.lower())
 
