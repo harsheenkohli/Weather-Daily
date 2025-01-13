@@ -34,8 +34,6 @@ weather-daily/
 │   ├── weather_chat.txt
 │   └── world-cities.csv
 │
-├── __pycache__/
-│
 ├── error_texts.py
 ├── main.py
 ├── ml_model.py
