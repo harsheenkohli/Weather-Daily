@@ -5,3 +5,4 @@ streamlit
 fuzzywuzzy
 python-Levenshtein
 nltk
+altair==4.2.2
